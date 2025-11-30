@@ -1,0 +1,7 @@
+# Carpetas de odoo
+addons
+db-data
+odoo-data
+
+# Entornos virtuales
+venv

@@ -1,0 +1,31 @@
+services:
+  odoo:
+    image: odoo:latest
+    container_name: odoo-proyecto
+    depends_on:
+      - db
+    ports:
+      - 8069:8069
+    volumes:
+      - ./odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    user: root
+  db:
+    image: postgres:latest
+    container_name: odoo-proyecto-db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+    volumes:
+      - ./db-data:/var/lib/postgresql
+
+volumes:
+  odoo-data:
+  db-data:
