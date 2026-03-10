@@ -1,30 +1,30 @@
-services:
-  odoo:
-    image: odoo:17.0
-    container_name: odoo-proyecto
-    depends_on:
-      - db
-    ports:
-      - "8069:8069"
-    volumes:
-      - odoo-data:/var/lib/odoo
-      - ./addons:/mnt/extra-addons
-    environment:
-      - HOST=db
-      - USER=odoo
-      - PASSWORD=odoo
-    user: root
+services: # Aquí empieza la lista de programas que vamos a usar
+  odoo: # El primer programa es Odoo
+    image: odoo:17.0 # Usa la versión 17 de Odoo de internet
+    container_name: odoo-proyecto # Ponle de nombre "odoo-proyecto" al grupo
+    depends_on: # No arranques Odoo hasta que...
+      - db # ...la base de datos esté encendida
+    ports: # Conexión de puertos:
+      - "8069:8069" # Entra por el 8069 de mi PC al 8069 de Odoo
+    volumes: # Carpetas compartidas:
+      - odoo-data:/var/lib/odoo # Guarda aquí las fotos y cosas de Odoo
+      - ./addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
+    environment: # Ajustes para que Odoo sepa hablar con la DB:
+      - HOST=db # El servidor de la DB se llama "db"
+      - USER=odoo # El usuario es "odoo"
+      - PASSWORD=odoo # La contraseña es "odoo"
+    user: root # Se hace todo como root para que no pida permisos
 
-  db:
-    image: postgres:15
-    container_name: odoo-proyecto-db
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo
-    volumes:
-      - db-data:/var/lib/postgresql/data
+  db: # El segundo contenedor es la Base de Datos
+    image: postgres:15 # Usa Postgres con la version versión 15
+    container_name: odoo-proyecto-db # Nombre del grupo de la base de datos
+    environment: # Ajustes para crear la base de datos:
+      - POSTGRES_DB=postgres # Crea una DB que se llame postgres
+      - POSTGRES_USER=odoo # Crea el usuario odoo
+      - POSTGRES_PASSWORD=odoo # Ponle la contraseña odoo
+    volumes: # Carpeta de la base de datos:
+      - db-data:/var/lib/postgresql/data # Guarda aquí todas las tablas para que no se borren
 
-volumes:
-  odoo-data:
-  db-data:
+volumes: # Aquí aviso a Docker que cree estos dos sitios:
+  odoo-data: # Sitio para datos de Odoo
+  db-data: # Sitio para los datos de la base de datos
