@@ -32,24 +32,6 @@ Una vez levantados los contenedores de Odoo, accedemos a la plataforma e instala
 
 ![Instalacion del modulo](docs/instalacion_modulo/instalacion_modulo.gif)
 
-## Capturas
-### Aplicación Ejecutandose
-Módulo instalado (Sale en el menú de la izquierda) y se puede acceder a él.
-
-![Modulo instalado](docs/capturas/modulo_instalado.gif) 
-
-### Funcionalidad principal operativa
-
-Se registran los inicios de sesión.
-
-![funcionalidad principal](docs/capturas/funcionalidad_principal.gif)
-
-### Interfaz de usuario
-
-Pestaña de seguridad en la ficha del contacto (Usuario).
-
-![interfaz de usuario](docs/capturas/interfaz_usuario.gif)
-
 ## Funcionalidades
 - [x] Registro automático de cada intento de inicio de sesión en la base de datos
 - [x] Almacenamiento de IP, fecha, hora, estado del intento y navegador
