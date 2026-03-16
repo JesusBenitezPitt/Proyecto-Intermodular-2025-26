@@ -1,0 +1,55 @@
+<odoo>
+    <record id="action_report_security_partner" model="ir.actions.report">
+        <field name="name">Informe de Seguridad (PDF)</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">autenticacion_inteligente.plantilla_informe_pdf</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="plantilla_informe_pdf">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Informe de Seguridad: <t t-esc="o.name"/></h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-4">
+                                <strong>Nivel de Confianza:</strong>
+                                <p t-field="o.x_nivel_confianza"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>Intentos Fallidos:</strong>
+                                <p t-field="o.x_limite_intentos"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>Última Conexión:</strong>
+                                <p t-field="o.x_ultima_conexion"/>
+                            </div>
+                        </div>
+                        <h4>Historial de Accesos Recientes</h4>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>IP</th>
+                                    <th>Resultado</th>
+                                    <th>Riesgo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.x_session_log_ids" t-as="log">
+                                    <td><span t-field="log.x_fecha_inicio"/></td>
+                                    <td><span t-field="log.x_ip"/></td>
+                                    <td><span t-field="log.x_estado_intento"/></td>
+                                    <td><span t-field="log.x_nivel_riesgo"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,97 @@
+<odoo>
+    <record id="accion_sesion_log" model="ir.actions.act_window">
+        <field name="name">Log de Sesiones</field>
+        <field name="res_model">autenticacion.sesion.log</field>
+        <field name="view_mode">tree,pivot,graph,form</field> </record>
+
+    <record id="action_log_riesgo_alto" model="ir.actions.act_window">
+        <field name="name">Alertas de Riesgo Alto</field>
+        <field name="res_model">autenticacion.sesion.log</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="domain">[('x_nivel_riesgo', 'in', ['alto', 'critico'])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay amenazas críticas detectadas.</p>
+        </field>
+    </record>
+
+    <record id="vista_sesion_log_list" model="ir.ui.view">
+        <field name="name">autenticacion.sesion.log.list</field>
+        <field name="model">autenticacion.sesion.log</field>
+        <field name="arch" type="xml">
+            <tree string="Log de Sesiones" decoration-danger="x_nivel_riesgo in ('alto', 'critico')" create="false">
+                <field name="partner_id"/>
+                <field name="x_fecha_inicio"/>
+                <field name="x_ip"/>
+                <field name="x_navegador"/>
+                <field name="x_nivel_riesgo" widget="badge" decoration-warning="x_nivel_riesgo == 'medio'" decoration-danger="x_nivel_riesgo in ('alto', 'critico')"/>
+                <field name="x_estado_intento" widget="badge" decoration-success="x_estado_intento == 'exito'" decoration-danger="x_estado_intento == 'bloqueo'"/>
+                <field name="x_alerta_seguridad"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="vista_sesion_log_pivot" model="ir.ui.view">
+        <field name="name">autenticacion.sesion.log.pivot</field>
+        <field name="model">autenticacion.sesion.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Fraude">
+                <field name="x_ip" type="row"/> <field name="x_nivel_riesgo" type="col"/> <field name="partner_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="vista_sesion_log_graph" model="ir.ui.view">
+        <field name="name">autenticacion.sesion.log.graph</field>
+        <field name="model">autenticacion.sesion.log</field>
+        <field name="arch" type="xml">
+            <graph string="Evolución de Intentos Fallidos" type="line" sample="1">
+                <field name="x_fecha_inicio" interval="day"/>
+                <field name="x_intentos_fallidos" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="vista_formulario_contactos" model="ir.ui.view">
+        <field name="name">vista.formulario.contactos</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page string="Seguridad" name="smart_security">
+                    <group>
+                        <group string="Configuración de Confianza">
+                            <field name="x_nivel_confianza" widget="priority"/>
+                            <field name="x_is_blocked"/>
+                            <field name="x_timestamp_bloqueo" readonly="1"/>
+                        </group>
+                        <group string="Métricas de Acceso">
+                            <field name="x_limite_intentos"/>
+                            <field name="x_ultima_conexion" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Historial de Auditoría (Logs)"/>
+                    <field name="x_session_log_ids" readonly="1">
+                        <tree limit="5">
+                            <field name="x_fecha_inicio"/>
+                            <field name="x_ip"/>
+                            <field name="x_nivel_riesgo" widget="badge"/>
+                            <field name="x_estado_intento" widget="badge"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="accion_informe_sql" model="ir.actions.act_window">
+        <field name="name">Análisis de Rastro Digital (SQL)</field>
+        <field name="res_model">autenticacion_inteligente.informe_seguridad</field>
+        <field name="view_mode">tree,pivot</field>
+    </record>
+
+    <menuitem id="menu_autenticacion_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security"/>
+    <menuitem id="menu_autenticacion_perfiles" parent="menu_autenticacion_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
+    <menuitem id="menu_autenticacion_sesiones" parent="menu_autenticacion_basica_root" name="Historial de Sesiones Comleto" action="accion_sesion_log" sequence="20"/>
+    <menuitem id="menu_autenticacion_alertas" parent="menu_autenticacion_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>
+    <menuitem id="menu_autenticacion_sql" parent="menu_autenticacion_basica_root" name="Consulta SQL Tiempo Real" action="accion_informe_sql" sequence="40"/>
+</odoo>
