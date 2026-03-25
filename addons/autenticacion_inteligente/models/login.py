@@ -1,5 +1,6 @@
 from odoo import models, api
 from odoo.exceptions import AccessError
+from odoo.http import request
 from datetime import datetime
 
 import logging
@@ -11,11 +12,34 @@ INTENTOS = {}
 class ResUsersLogin(models.Model):
     _inherit = 'res.users'
 
+    @api.model
+    def _parse_user_agent(self, ua_string):
+        if not ua_string:
+            return 'Desconocido'
+        ua_string = str(ua_string) # Aseguramos que el user agent sea una cadena de texto para evitar errores al buscar subcadenas.
+        if 'Odoo' in ua_string: return 'Odoo App'
+        if 'Edg' in ua_string: return 'Edge'
+        if 'Chrome' in ua_string: return 'Chrome'
+        if 'Firefox' in ua_string: return 'Firefox'
+        if 'Safari' in ua_string: return 'Safari'
+        return ua_string[:50] # Cortamos para que quepa bien en el char.
+
     # Sobrescribimos el método _login para registrar los intentos de inicio de sesión
     @classmethod
     def _login(cls, db, login, password, user_agent_env=None):
         auth_result = False # Inicializamos el resultado de la autenticación como falso.
         error_auth = None # Variable para almacenar cualquier error que ocurra durante el proceso de autenticación.
+
+        ip = request.httprequest.remote_addr or 'Desconocida'
+        ua_raw = request.httprequest.user_agent.string or 'Desconocido'
+        _logger.info("Intento de inicio de sesión. Usuario: '%s', IP: '%s', User Agent: '%s'", login, ip, ua_raw)
+
+        # Parseamos el user agent.
+        if 'Chrome' in ua_raw: navegador = 'Chrome'
+        elif 'Firefox' in ua_raw: navegador = 'Firefox'
+        elif 'Safari' in ua_raw: navegador = 'Safari'
+        elif 'Edge' in ua_raw: navegador = 'Edge'
+        else: navegador = ua_raw[:50]
 
         with cls.pool.cursor() as cr:
             env = api.Environment(cr, 1, {})
@@ -48,8 +72,7 @@ class ResUsersLogin(models.Model):
 
                     intentos_fallidos = INTENTOS.get(login, 0) # Obtenemos el número de intentos fallidos para el usuario desde memoria.
                     usuario = user.partner_id.id # Obtenemos el ID del partner relacionado con el usuario.
-                    ip = user_agent_env.get('REMOTE_ADDR', 'Desconocida') if user_agent_env else 'Desconocida' # Obtenemos la dirección IP del usuario.
-                    navegador = user_agent_env.get('HTTP_USER_AGENT', 'Desconocido') if user_agent_env else 'Desconocido' # Obtenemos el navegador del usuario. NO FUNCIONA, HAY QUE BUSCAR ALTERNATIVA.
+                    # ip = user_agent_env.get('REMOTE_ADDR', 'Desconocida') if user_agent_env else 'Desconocida' # Obtenemos la dirección IP del usuario.
 
                     env['autenticacion.sesion.log'].sudo().create({
                         'partner_id': usuario, # Relación con el modelo res.partner para identificar al usuario.
@@ -79,8 +102,6 @@ class ResUsersLogin(models.Model):
                     
                     intentos_fallidos = INTENTOS.get(login, 0) # Obtenemos el número de intentos fallidos para el usuario desde memoria.
                     usuario = user.partner_id.id # Obtenemos el ID del partner relacionado con el usuario.
-                    ip = user_agent_env.get('REMOTE_ADDR', 'Desconocida') if user_agent_env else 'Desconocida' # Obtenemos la dirección IP del usuario.
-                    navegador = user_agent_env.get('HTTP_USER_AGENT', 'Desconocido') if user_agent_env else 'Desconocido' # Obtenemos el navegador del usuario. NO FUNCIONA, HAY QUE BUSCAR ALTERNATIVA.
 
                     _logger.info("=== LOGIN DEBUG ===")
                     _logger.info("Login: %s", login)
