@@ -17,6 +17,13 @@ class ResUsersLogin(models.Model):
         auth_result = False # Inicializamos el resultado de la autenticación como falso.
         error_auth = None # Variable para almacenar cualquier error que ocurra durante el proceso de autenticación.
 
+        with cls.pool.cursor() as cr:
+            env = api.Environment(cr, 1, {})
+            user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+            if user and user.partner_id.x_is_blocked:
+                _logger.warning("El usuario '%s' esta bloqueado.", login)
+                raise AccessError("La cuenta de este usuario está bloqueada debido a múltiples intentos de inicio de sesión fallidos. Por favor, contacte con el administrador para desbloquear su cuenta.")
+
         try:
             auth_result = super()._login(db, login, password, user_agent_env=user_agent_env)
         except Exception as e:
@@ -27,11 +34,37 @@ class ResUsersLogin(models.Model):
 
         if estado == 'fallo':
             INTENTOS[login] = INTENTOS.get(login, 0) + 1 # Incrementamos el contador de intentos fallidos para el usuario en memoria.
-            _logger.info("=== LOGIN DEBUG FALLO ===")
-            _logger.info("Login: %s", login)
-            _logger.info("Auth result: %s", auth_result)
-            _logger.info("Estado: %s", estado)
-            _logger.info("Intentos fallidos: %s", INTENTOS[login])
+            _logger.info("Intento de inicio de sesión fallido para el usuario '%s'. Intentos fallidos: %d", login, INTENTOS[login])
+            with cls.pool.cursor() as cr:
+                env = api.Environment(cr, 1, {}) # Usamos el ID de usuario 1 (administrador) para realizar las operaciones en la base de datos
+                user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+
+                if user and INTENTOS[login] >= user.partner_id.x_limite_intentos: # Si el usuario existe y ha alcanzado el límite de intentos fallidos, bloqueamos la cuenta.
+                    _logger.warning("El usuario '%s' ha alcanzado el límite de intentos fallidos. Bloqueando la cuenta.", login)
+                    user.partner_id.write({
+                        'x_is_blocked': True, # Marcamos la cuenta del usuario como bloqueada.
+                        'x_timestamp_bloqueo': datetime.now(), # Guardamos la fecha y hora del bloqueo de la cuenta.
+                    })
+
+                    intentos_fallidos = INTENTOS.get(login, 0) # Obtenemos el número de intentos fallidos para el usuario desde memoria.
+                    usuario = user.partner_id.id # Obtenemos el ID del partner relacionado con el usuario.
+                    ip = user_agent_env.get('REMOTE_ADDR', 'Desconocida') if user_agent_env else 'Desconocida' # Obtenemos la dirección IP del usuario.
+                    navegador = user_agent_env.get('HTTP_USER_AGENT', 'Desconocido') if user_agent_env else 'Desconocido' # Obtenemos el navegador del usuario. NO FUNCIONA, HAY QUE BUSCAR ALTERNATIVA.
+
+                    env['autenticacion.sesion.log'].sudo().create({
+                        'partner_id': usuario, # Relación con el modelo res.partner para identificar al usuario.
+                        'x_ip': ip, # Dirección IP del usuario.
+                        'x_navegador': navegador, # Navegador del usuario. # TODO: Extraer el navegador correctamente ya que ahora mismo sale siempre en Desconocido porque el user agent no lo almacena y hay que buscar alternativa.
+                        'x_fecha_inicio': datetime.now(), # Fecha y hora del intento de inicio de sesión.
+                        'x_estado_intento': estado, # Estado del intento de inicio de sesión (éxito o fallo).
+                        'x_intentos_fallidos': intentos_fallidos, # Contador de intentos fallidos.
+                    })
+
+                    cr.commit() # Guardamos los cambios en la base de datos.
+                    _logger.warning("La cuenta del usuario '%s' ha sido bloqueada debido a múltiples intentos de inicio de sesión fallidos.", login) 
+
+                if error_auth:
+                    raise error_auth # Si ocurrió un error durante la autenticación, lanzamos una excepción guardada en error_auth.
         else:
             try:
                 with cls.pool.cursor() as cr:
@@ -55,14 +88,15 @@ class ResUsersLogin(models.Model):
                     _logger.info("Estado: %s", estado)
                     _logger.info("Intentos fallidos: %s", intentos_fallidos)
                 
-                    # Comprobamos que el estado de inicio de sesión sea "fallo".
+                    user.partner_id.write({'x_ultima_conexion': datetime.now()}) # Actualizamos la fecha de la última conexión exitosa del usuario.
+
                     env['autenticacion.sesion.log'].sudo().create({
                         'partner_id': usuario, # Relación con el modelo res.partner para identificar al usuario.
                         'x_ip': ip, # Dirección IP del usuario.
                         'x_navegador': navegador, # Navegador del usuario. # TODO: Extraer el navegador correctamente ya que ahora mismo sale siempre en Desconocido porque el user agent no lo almacena y hay que buscar alternativa.
                         'x_fecha_inicio': datetime.now(), # Fecha y hora del intento de inicio de sesión.
                         'x_estado_intento': estado, # Estado del intento de inicio de sesión (éxito o fallo).
-                        'x_intentos_fallidos': intentos_fallidos, # Contador de intentos fallidos. # TODO: Hacer que el contador incremente con cada intento de inicio de sesión fallido.
+                        'x_intentos_fallidos': intentos_fallidos, # Contador de intentos fallidos.
                     })
 
                     cr.commit() # Guardamos los cambios en la base de datos.
@@ -73,8 +107,5 @@ class ResUsersLogin(models.Model):
             # En caso de que ocurra algún error durante el proceso de registro del intento de inicio de sesión, simplemente lo ignoramos.
             except Exception as e:
                 _logger.error("Error al registrar el intento de inicio de sesión: %s", e)
-
-        if error_auth:
-            raise error_auth # Si ocurrió un error durante la autenticación, lanzamos una excepción guardada en error_auth.
 
         return auth_result # Devolvemos el resultado del intento de inicio de sesión (éxito o fallo).
