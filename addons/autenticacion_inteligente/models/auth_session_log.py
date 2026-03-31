@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 from sklearn.ensemble import IsolationForest
 import numpy as np
 
@@ -30,6 +30,7 @@ class AutenticacionSesionLog(models.Model):
         ('bloqueo', 'Bloqueo IA')
     ], string='Resultado', readonly=True) # Campo para guardar el estado del intento.
 
+    @api.model
     def analizar_anomalia(self, partner_id, hora_actual, intentos):
         logs_previos = self.search_read([('partner_id', '=', partner_id)], ['x_fecha_inicio', 'x_intentos_fallidos'])
         

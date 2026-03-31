@@ -81,6 +81,8 @@ class ResUsersLogin(models.Model):
                         'x_fecha_inicio': datetime.now(), # Fecha y hora del intento de inicio de sesión.
                         'x_estado_intento': estado, # Estado del intento de inicio de sesión (éxito o fallo).
                         'x_intentos_fallidos': intentos_fallidos, # Contador de intentos fallidos.
+                        'x_nivel_riesgo': 'alto', # Nivel de riesgo alto por haber alcanzado el límite de intentos fallidos.
+                        'x_alerta_seguridad': 'La cuenta ha sido bloqueada por superar el límite de intentos fallidos.' # Alerta de seguridad indicando que la cuenta ha sido bloqueada.
                     })
 
                     cr.commit() # Guardamos los cambios en la base de datos.
@@ -103,6 +105,9 @@ class ResUsersLogin(models.Model):
                     intentos_fallidos = INTENTOS.get(login, 0) # Obtenemos el número de intentos fallidos para el usuario desde memoria.
                     usuario = user.partner_id.id # Obtenemos el ID del partner relacionado con el usuario.
 
+                    log_obj = env['autenticacion.sesion.log'].sudo()
+                    nivel_ia = log_obj.analizar_anomalia(usuario, datetime.now().hour, intentos_fallidos) # Analizamos el nivel de riesgo del intento de inicio de sesión utilizando la IA.
+
                     _logger.info("=== LOGIN DEBUG ===")
                     _logger.info("Login: %s", login)
                     _logger.info("Auth result: %s", auth_result)
@@ -118,6 +123,8 @@ class ResUsersLogin(models.Model):
                         'x_fecha_inicio': datetime.now(), # Fecha y hora del intento de inicio de sesión.
                         'x_estado_intento': estado, # Estado del intento de inicio de sesión (éxito o fallo).
                         'x_intentos_fallidos': intentos_fallidos, # Contador de intentos fallidos.
+                        'x_nivel_riesgo': nivel_ia, # Nivel de riesgo calculado por la IA.
+                        'x_alerta_seguridad': 'Análisis de la IA: Nivel de riesgo %s' % nivel_ia # Alerta de seguridad indicando el nivel de riesgo calculado por la IA.
                     })
 
                     cr.commit() # Guardamos los cambios en la base de datos.
