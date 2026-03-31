@@ -32,6 +32,22 @@ Una vez levantados los contenedores de Odoo, accedemos a la plataforma e instala
 
 ![Instalacion del modulo](docs/instalacion_modulo/instalacion_modulo.gif)
 
+## Capturas de pantalla
+### Aplicación ejecutandose
+Simplemente vemos como el modulo se ha instalado correctamente.
+
+![Modulo funcionando](docs/capturas/modulo_instalado.gif)
+
+### Funcionalidad principal requerida
+Como se puede observar tenemos dos tipos de registro el de fallo (cuando el usuario supera el limite) y el de exito (cuando el usuario accede correctamente).
+
+![Funcionalidad minima](docs/capturas/funcionalidad_principal.gif)
+
+### Interfaz de usuario
+Aqui muestro la pantalla de ajustes del usuario para establecer su minimo de intentos, etc.
+
+![Interfaz de usuario](docs/capturas/interfaz_usuario.gif)
+
 ## Funcionalidades
 - [x] Registro automático de cada intento de inicio de sesión en la base de datos
 - [x] Almacenamiento de IP, fecha, hora, estado del intento y navegador
