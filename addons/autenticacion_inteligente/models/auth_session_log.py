@@ -1,4 +1,6 @@
 from odoo import models, fields
+from sklearn.ensemble import IsolationForest
+import numpy as np
 
 class AutenticacionSesionLog(models.Model):
     _name = 'autenticacion.sesion.log'
@@ -14,11 +16,8 @@ class AutenticacionSesionLog(models.Model):
     
     x_intentos_fallidos = fields.Integer(string='Intentos Fallidos', readonly=True) # Campo para guardar los intentos fallidos.
     x_nivel_riesgo = fields.Selection([
-        ('muy_bajo', 'Muy Bajo'),
         ('bajo', 'Bajo'),
-        ('medio', 'Medio'),
-        ('alto', 'Alto'),
-        ('critico', 'Crítico')
+        ('alto', 'Alto')
     ], string='Nivel de Riesgo', default='muy_bajo') # Campo para guardar el nivel de riesgo de la cuenta.
     
     x_alerta_seguridad = fields.Char(string='Alertas o eventos de seguridad', readonly=True) # Campo para guardar las alertas o eventos asociados.
@@ -30,3 +29,18 @@ class AutenticacionSesionLog(models.Model):
         ('fallo', 'Fallo'),
         ('bloqueo', 'Bloqueo IA')
     ], string='Resultado', readonly=True) # Campo para guardar el estado del intento.
+
+    def analizar_anomalia(self, partner_id, hora_actual, intentos):
+        logs_previos = self.search_read([('partner_id', '=', partner_id)], ['x_fecha_inicio', 'x_intentos_fallidos'])
+        
+        if len(logs_previos) < 5:
+            return 'bajo'
+
+        X = [[l['x_fecha_inicio'].hour, l['x_intentos_fallidos']] for l in logs_previos]
+        
+        clf = IsolationForest(contamination=0.1, random_state=42)
+        clf.fit(X)
+        
+        prediccion = clf.predict([[hora_actual, intentos]])
+        
+        return 'alto' if prediccion[0] == -1 else 'bajo'
