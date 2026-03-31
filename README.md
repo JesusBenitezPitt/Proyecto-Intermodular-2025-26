@@ -56,8 +56,8 @@ Aqui muestro la pantalla de ajustes del usuario para establecer su minimo de int
 - [x] Informe PDF de seguridad por contacto
 - [x] Consulta SQL de análisis de fraude en tiempo real
 - [x] Vista de alertas críticas filtrada por nivel de riesgo alto y crítico
-- [ ] Detección y bloqueo automático tras N intentos fallidos
-- [ ] Extracción correcta del navegador del usuario
+- [x] Detección y bloqueo automático tras N intentos fallidos
+- [x] Extracción correcta del navegador del usuario
 - [ ] Cálculo automático del nivel de riesgo mediante IA
 - [ ] Notificaciones al administrador ante accesos sospechosos
 - [ ] Informe de patrones temporales por franja horaria
