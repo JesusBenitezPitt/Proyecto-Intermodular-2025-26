@@ -8,7 +8,7 @@
         <field name="name">Alertas de Riesgo Alto</field>
         <field name="res_model">autenticacion.sesion.log</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="domain">[('x_nivel_riesgo', 'in', ['alto', 'critico'])]</field>
+        <field name="domain">[('x_nivel_riesgo', 'in', ['alto'])]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No hay amenazas críticas detectadas.</p>
         </field>
@@ -18,12 +18,12 @@
         <field name="name">autenticacion.sesion.log.list</field>
         <field name="model">autenticacion.sesion.log</field>
         <field name="arch" type="xml">
-            <tree string="Log de Sesiones" decoration-danger="x_nivel_riesgo in ('alto', 'critico')" create="false">
+            <tree string="Log de Sesiones" decoration-danger="x_nivel_riesgo in ('alto')" create="false">
                 <field name="partner_id"/>
                 <field name="x_fecha_inicio"/>
                 <field name="x_ip"/>
                 <field name="x_navegador"/>
-                <field name="x_nivel_riesgo" widget="badge" decoration-warning="x_nivel_riesgo == 'medio'" decoration-danger="x_nivel_riesgo in ('alto', 'critico')"/>
+                <field name="x_nivel_riesgo" widget="badge" decoration-warning="x_nivel_riesgo == 'medio'" decoration-danger="x_nivel_riesgo in ('alto')"/>
                 <field name="x_estado_intento" widget="badge" decoration-success="x_estado_intento == 'exito'" decoration-danger="x_estado_intento == 'bloqueo'"/>
                 <field name="x_alerta_seguridad"/>
             </tree>

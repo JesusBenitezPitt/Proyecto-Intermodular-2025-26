@@ -88,6 +88,10 @@ class ResUsersLogin(models.Model):
                     cr.commit() # Guardamos los cambios en la base de datos.
                     _logger.warning("La cuenta del usuario '%s' ha sido bloqueada debido a múltiples intentos de inicio de sesión fallidos.", login) 
 
+                    if login in INTENTOS:
+                        del INTENTOS[login] # Si el inicio de sesión fue fallido, igualmente eliminamos el contador de intentos fallidos para ese usuario en memoria.
+
+
                 if error_auth:
                     raise error_auth # Si ocurrió un error durante la autenticación, lanzamos una excepción guardada en error_auth.
         else:

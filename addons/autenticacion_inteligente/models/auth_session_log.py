@@ -18,7 +18,7 @@ class AutenticacionSesionLog(models.Model):
     x_nivel_riesgo = fields.Selection([
         ('bajo', 'Bajo'),
         ('alto', 'Alto')
-    ], string='Nivel de Riesgo', default='muy_bajo') # Campo para guardar el nivel de riesgo de la cuenta.
+    ], string='Nivel de Riesgo', default='bajo') # Campo para guardar el nivel de riesgo de la cuenta.
     
     x_alerta_seguridad = fields.Char(string='Alertas o eventos de seguridad', readonly=True) # Campo para guardar las alertas o eventos asociados.
     
@@ -30,6 +30,7 @@ class AutenticacionSesionLog(models.Model):
         ('bloqueo', 'Bloqueo IA')
     ], string='Resultado', readonly=True) # Campo para guardar el estado del intento.
 
+    # TODO: Integrar geolocalización.
     @api.model
     def analizar_anomalia(self, partner_id, hora_actual, intentos):
         logs_previos = self.search_read([('partner_id', '=', partner_id)], ['x_fecha_inicio', 'x_intentos_fallidos'])

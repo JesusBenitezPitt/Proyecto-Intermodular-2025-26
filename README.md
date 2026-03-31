@@ -60,6 +60,7 @@ Aqui muestro la pantalla de ajustes del usuario para establecer su minimo de int
 - [x] Extracción correcta del navegador del usuario
 - [ ] Cálculo automático del nivel de riesgo mediante IA
 - [ ] Notificaciones al administrador ante accesos sospechosos
+- [ ] Notificación al usuario de confirmación de acceso a la cuenta
 - [ ] Informe de patrones temporales por franja horaria
 
 ## Autor

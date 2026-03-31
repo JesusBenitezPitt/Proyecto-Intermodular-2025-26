@@ -1,6 +1,6 @@
 services: # Aquí empieza la lista de programas que vamos a usar
   odoo: # El primer programa es Odoo
-    image: odoo:17.0 # Usa la versión 17 de Odoo de internet
+    image: jesusbenitezpitt/odoo-proyecto:17.0 # Uso la imagen que construi con el Dockerfile de este proyecto.
     container_name: odoo-proyecto # Ponle de nombre "odoo-proyecto" al grupo
     depends_on: # No arranques Odoo hasta que...
       - db # ...la base de datos esté encendida
