@@ -32,21 +32,67 @@ Una vez levantados los contenedores de Odoo, accedemos a la plataforma e instala
 
 ![Instalacion del modulo](docs/instalacion_modulo/instalacion_modulo.gif)
 
-## Capturas de pantalla
-### Aplicación ejecutandose
-Simplemente vemos como el modulo se ha instalado correctamente.
+## Funcionalidades Nuevas
+### Informe de patrones temporales por franjas horarias global
 
-![Modulo funcionando](docs/capturas/modulo_instalado.gif)
+![Informe Patrones Temporales](docs/capturas/informe_patrones_temporales.png)
 
-### Funcionalidad principal requerida
-Como se puede observar tenemos dos tipos de registro el de fallo (cuando el usuario supera el limite) y el de exito (cuando el usuario accede correctamente).
+### Informe de patrones temporales por franjas horarias individual
 
-![Funcionalidad minima](docs/capturas/funcionalidad_principal.gif)
+![Informe Patrones Temporales Individual](docs/capturas/informe_patrones_temporales_individual.png)
 
-### Interfaz de usuario
-Aqui muestro la pantalla de ajustes del usuario para establecer su minimo de intentos, etc.
+Pueden parecer identicos pero uno recuenta los inicios de sesión de forma global y el otro de manera individual, es decir, de cada contacto.
 
-![Interfaz de usuario](docs/capturas/interfaz_usuario.gif)
+### Análisis de IA por franjas horarias y pequeño script de Python para generar datos de entrenamiento y test.
+
+![Analisis de IA](docs/capturas/ia.png)
+
+Como podemos observar los dos ultimos registros son exactamente en la madrugada justo donde rompe con la rutina de acceso al sistema.
+
+Este es el script de python que he usado para generar los datos de entrenamiento y prueba
+
+```py
+        # 1. GENERACIÓN DE PATRÓN NORMAL (Entrenamiento)
+        # Creamos 10 registros en horario laboral (9h a 18h)
+        for i in range(10):
+            hora_random = random.randint(9, 18)
+            self.env['autenticacion.sesion.log'].create({
+                'partner_id': self.id,
+                'x_fecha_inicio': datetime.now().replace(hour=hora_random),
+                'x_ip': f'127.0.0.{i}',
+                'x_navegador': 'Safari',
+                'x_intentos_fallidos': random.randint(0, 2),
+                'x_estado_intento': 'exito',
+                'x_nivel_riesgo': 'bajo',
+            })
+
+        # 2. PRUEBA DE FUEGO PARA LA IA
+        log_model = self.env['autenticacion.sesion.log']
+
+        # Caso A: Acceso dentro del horario habitual (Debe ser riesgo BAJO)
+        riesgo_a = log_model.analizar_anomalia(self.id, 14, 0)
+        log_model.create({
+            'partner_id': self.id,
+            'x_fecha_inicio': datetime.now().replace(hour=14, minute=0),
+            'x_ip': '192.168.1.50',
+            'x_navegador': 'Chrome (Test Normal)',
+            'x_intentos_fallidos': 0,
+            'x_estado_intento': 'exito',
+            'x_nivel_riesgo': riesgo_a,
+        })
+
+        # Caso B: Acceso fuera de horario y con fallos (Debe ser riesgo ALTO)
+        riesgo_b = log_model.analizar_anomalia(self.id, 3, 5)
+        log_model.create({
+            'partner_id': self.id,
+            'x_fecha_inicio': datetime.now().replace(hour=3, minute=0),
+            'x_ip': '85.12.34.56',
+            'x_navegador': 'Firefox (Test Anomalía)',
+            'x_intentos_fallidos': 5,
+            'x_estado_intento': 'fallo',
+            'x_nivel_riesgo': riesgo_b,
+        })
+```
 
 ## Funcionalidades
 - [x] Registro automático de cada intento de inicio de sesión en la base de datos
@@ -58,10 +104,10 @@ Aqui muestro la pantalla de ajustes del usuario para establecer su minimo de int
 - [x] Vista de alertas críticas filtrada por nivel de riesgo alto y crítico
 - [x] Detección y bloqueo automático tras N intentos fallidos
 - [x] Extracción correcta del navegador del usuario
-- [ ] Cálculo automático del nivel de riesgo mediante IA
+- [X] Cálculo automático del nivel de riesgo mediante IA
 - [ ] Notificaciones al administrador ante accesos sospechosos
 - [ ] Notificación al usuario de confirmación de acceso a la cuenta
-- [ ] Informe de patrones temporales por franja horaria
+- [x] Informe de patrones temporales por franja horaria
 
 ## Autor
 **Jesús Benítez Pitt**
