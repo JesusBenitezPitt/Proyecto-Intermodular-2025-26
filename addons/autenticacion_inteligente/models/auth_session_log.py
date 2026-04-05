@@ -30,6 +30,24 @@ class AutenticacionSesionLog(models.Model):
         ('bloqueo', 'Bloqueo IA')
     ], string='Resultado', readonly=True) # Campo para guardar el estado del intento.
 
+    x_franja_horaria = fields.Char(string="Franja Horaria", compute="_compute_franja_horaria", store=True)
+
+    @api.depends('x_fecha_inicio')
+    def _compute_franja_horaria(self):
+        for record in self:
+            if record.x_fecha_inicio:
+                hora = record.x_fecha_inicio.hour
+                if 0 <= hora <= 6:
+                    record.x_franja_horaria = 'Madrugada (0-6h)'
+                elif 7 <= hora <= 12:
+                    record.x_franja_horaria = 'Mañana (7-12h)'
+                elif 13 <= hora <= 20:
+                    record.x_franja_horaria = 'Tarde (13-20h)'
+                else:
+                    record.x_franja_horaria = 'Noche (21-23h)'
+            else:
+                record.x_franja_horaria = 'Sin fecha'
+
     # TODO: Integrar geolocalización.
     @api.model
     def analizar_anomalia(self, partner_id, hora_actual, intentos):

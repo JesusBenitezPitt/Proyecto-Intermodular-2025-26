@@ -89,9 +89,58 @@
         <field name="view_mode">tree,pivot</field>
     </record>
 
+    <record id="action_report_franjas_horarias" model="ir.actions.act_window">
+        <field name="name">Informe de Franjas Horarias</field>
+        <field name="res_model">informe.franjas.horarias</field>
+        <field name="view_mode">graph,pivot,tree</field>
+    </record>
+
+    <record id="view_franjas_horarias_graph" model="ir.ui.view">
+        <field name="name">informe.franjas.horarias.graph</field>
+        <field name="model">informe.franjas.horarias</field>
+        <field name="arch" type="xml">
+            <graph string="Accesos por Franja" type="bar">
+                <field name="franja_horaria"/>
+                <field name="total_accesos" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_franjas_horarias_pivot" model="ir.ui.view">
+        <field name="name">informe.franjas.horarias.pivot</field>
+        <field name="model">informe.franjas.horarias</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Franjas">
+                <field name="franja_horaria" type="row"/>
+                <field name="total_accesos" type="measure"/>
+                <field name="alertas_ia" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_sesion_log_search" model="ir.ui.view">
+        <field name="name">autenticacion.sesion.log.search</field>
+        <field name="model">autenticacion.sesion.log</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Sesiones">
+                <field name="partner_id"/>
+                <field name="x_ip"/>
+                <filter string="Accesos de Madrugada" name="madrugada" domain="[('x_franja_horaria', '=', 'Madrugada (0-6h)')]"/>
+                <filter string="Riesgo Alto" name="alto_riesgo" domain="[('x_nivel_riesgo', '=', 'alto')]"/>
+                <separator/>
+                <group expand="0" string="Agrupar por...">
+                    <filter string="Usuario" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Franja Horaria" name="group_by_franja" context="{'group_by': 'x_franja_horaria'}"/>
+                    <filter string="Día" name="group_by_fecha" context="{'group_by': 'x_fecha_inicio:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <menuitem id="menu_autenticacion_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security"/>
     <menuitem id="menu_autenticacion_perfiles" parent="menu_autenticacion_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
     <menuitem id="menu_autenticacion_sesiones" parent="menu_autenticacion_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
     <menuitem id="menu_autenticacion_alertas" parent="menu_autenticacion_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>
     <menuitem id="menu_autenticacion_sql" parent="menu_autenticacion_basica_root" name="Consulta SQL Tiempo Real" action="accion_informe_sql" sequence="40"/>
+    <menuitem id="menu_reporte_patrones" parent="menu_autenticacion_basica_root" name="Estadísticas por Franjas Horarias" action="action_report_franjas_horarias" sequence="50"/>
 </odoo>

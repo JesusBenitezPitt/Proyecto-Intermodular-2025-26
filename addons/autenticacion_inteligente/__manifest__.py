@@ -14,6 +14,6 @@
     'installable': True,
     'application': True,
     'external_dependencies': {
-        'python': ['scikit-learn']
+        'python': ['scikit-learn', 'pandas', 'numpy']
     }
 }
