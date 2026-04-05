@@ -34,17 +34,45 @@ class Usuario(models.Model):
             },
         }
 
-    def action_generar_datos_demo(self):
+    def action_simulacion_accesos(self):
         for i in range(10):
-            hora_random = random.randint(0, 23)
-            intentos = random.randint(0, self.x_limite_intentos)
+            hora_random = random.randint(9, 18)
+            intentos = random.randint(0, 2)
             self.env['autenticacion.sesion.log'].create({
                 'partner_id': self.id,
                 'x_fecha_inicio': datetime.now().replace(hour=hora_random),
                 'x_ip': f'127.0.0.{i}',
                 'x_navegador': 'Safari',
                 'x_intentos_fallidos': intentos,
-                'x_estado_intento': 'fallo' if intentos >= self.x_limite_intentos else 'exito',
-                'x_nivel_riesgo': 'alto' if hora_random <= 8 or hora_random >= 21 else 'bajo',
+                'x_estado_intento': 'exito',
+                'x_nivel_riesgo': 'bajo',
             })
-        return True
+
+        log_model = self.env['autenticacion.sesion.log']
+
+        riesgo_a = log_model.analizar_anomalia(self.id, 14, 0)
+        log_model.create({
+            'partner_id': self.id,
+            'x_fecha_inicio': datetime.now().replace(hour=14, minute=0),
+            'x_ip': '192.168.1.50',
+            'x_navegador': 'Chrome (Test Normal)',
+            'x_intentos_fallidos': 0,
+            'x_estado_intento': 'exito',
+            'x_nivel_riesgo': riesgo_a,
+        })
+
+        riesgo_b = log_model.analizar_anomalia(self.id, 3, 5)
+        log_model.create({
+            'partner_id': self.id,
+            'x_fecha_inicio': datetime.now().replace(hour=3, minute=0),
+            'x_ip': '85.12.34.56',
+            'x_navegador': 'Firefox (Test Anomalía)',
+            'x_intentos_fallidos': 5,
+            'x_estado_intento': 'fallo',
+            'x_nivel_riesgo': riesgo_b,
+        })
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }

@@ -53,12 +53,19 @@ class AutenticacionSesionLog(models.Model):
     # TODO: Integrar geolocalización.
     @api.model
     def analizar_anomalia(self, partner_id, hora_actual, intentos):
+        
+        tz = pytz.timezone('Europe/Madrid')
+
         logs_previos = self.search_read([('partner_id', '=', partner_id)], ['x_fecha_inicio', 'x_intentos_fallidos'])
         
         if len(logs_previos) < 5:
             return 'bajo'
 
-        X = [[l['x_fecha_inicio'].hour, l['x_intentos_fallidos']] for l in logs_previos]
+        X = []
+        for l in logs_previos:
+            if l['x_fecha_inicio']:
+                fecha_local = pytz.utc.localize(l['x_fecha_inicio']).astimezone(tz)
+                X.append([fecha_local.hour, l['x_intentos_fallidos']])
         
         clf = IsolationForest(contamination=0.1, random_state=42)
         clf.fit(X)
