@@ -157,7 +157,7 @@
         </field>
     </record>
 
-    <menuitem id="menu_autenticacion_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security"/>
+    <menuitem id="menu_autenticacion_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security" groups="base.group_system"/>
     <menuitem id="menu_autenticacion_perfiles" parent="menu_autenticacion_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
     <menuitem id="menu_autenticacion_sesiones" parent="menu_autenticacion_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
     <menuitem id="menu_autenticacion_alertas" parent="menu_autenticacion_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>

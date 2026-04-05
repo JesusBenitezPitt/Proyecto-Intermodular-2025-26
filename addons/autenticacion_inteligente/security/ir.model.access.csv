@@ -1,4 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_sesion_log,autenticacion.sesion.log.access,model_autenticacion_sesion_log,,1,1,1,1
-access_informe_sql,informe.seguridad.access,model_autenticacion_inteligente_informe_seguridad,,1,0,0,0
-access_informe_franjas_horarias,informe.franjas.horarias,model_informe_franjas_horarias,,1,1,1,1
+access_sesion_log,autenticacion.sesion.log.access,model_autenticacion_sesion_log,base.group_system,1,1,1,1
+access_informe_sql,informe.seguridad.access,model_autenticacion_inteligente_informe_seguridad,base.group_system,1,0,0,0
+access_informe_franjas_horarias,informe.franjas.horarias,model_informe_franjas_horarias,base.group_system,1,0,0,0
