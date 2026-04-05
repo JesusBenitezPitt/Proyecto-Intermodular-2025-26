@@ -10,6 +10,7 @@ para detectar comportamientos sospechosos y prevenir accesos fraudulentos a la p
 - **PostgreSQL 15** — Base de datos
 - **XML** — Definición de vistas e informes
 - **Docker / Docker Compose** — Entorno de desarrollo
+- **Scikit-Learning** — Motor de Machine Learning
 
 ## Requisitos previos
 - Docker y Docker Compose instalado
