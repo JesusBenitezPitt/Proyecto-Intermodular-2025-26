@@ -1,6 +1,6 @@
 from odoo import models, fields, api
 from sklearn.ensemble import IsolationForest
-import numpy as np
+import pytz
 
 class AutenticacionSesionLog(models.Model):
     _name = 'autenticacion.sesion.log'
@@ -10,9 +10,7 @@ class AutenticacionSesionLog(models.Model):
     partner_id = fields.Many2one('res.partner', string='Usuario', required=True, readonly=True) # Relación para extraer el usuario.
     admin_id = fields.Many2one('res.users', string='Admin Responsable') # Relación para extraer el administrador que ha supervisado la sesión.
 
-    x_session_token = fields.Char(string='Token de Sesión', readonly=True) # Campo para guardar el token de sesión.
     x_fecha_inicio = fields.Datetime(string='Fecha Inicio', default=fields.Datetime.now, readonly=True) # Campo para guardar la fecha de inicio de sesión.
-    x_fecha_cierre = fields.Datetime(string='Fecha de Cierre', readonly=True) # Campo para guardar la fecha de cierre de la sesión.
     
     x_intentos_fallidos = fields.Integer(string='Intentos Fallidos', readonly=True) # Campo para guardar los intentos fallidos.
     x_nivel_riesgo = fields.Selection([
@@ -34,17 +32,21 @@ class AutenticacionSesionLog(models.Model):
 
     @api.depends('x_fecha_inicio')
     def _compute_franja_horaria(self):
+        tz = pytz.timezone('Europe/Madrid')
+        
         for record in self:
             if record.x_fecha_inicio:
-                hora = record.x_fecha_inicio.hour
+                fecha_local = pytz.utc.localize(record.x_fecha_inicio).astimezone(tz)
+                hora = fecha_local.hour
+
                 if 0 <= hora <= 6:
-                    record.x_franja_horaria = 'Madrugada (0-6h)'
+                    record.x_franja_horaria = '1. Madrugada (00-06h)'
                 elif 7 <= hora <= 12:
-                    record.x_franja_horaria = 'Mañana (7-12h)'
+                    record.x_franja_horaria = '2. Mañana (07-12h)'
                 elif 13 <= hora <= 20:
-                    record.x_franja_horaria = 'Tarde (13-20h)'
+                    record.x_franja_horaria = '3. Tarde (13-20h)'
                 else:
-                    record.x_franja_horaria = 'Noche (21-23h)'
+                    record.x_franja_horaria = '4. Noche (21-23h)'
             else:
                 record.x_franja_horaria = 'Sin fecha'
 

@@ -58,6 +58,7 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position="after">
                 <page string="Seguridad" name="smart_security">
+                    <button name="action_simulacion_accesos" string="Generar Simulaciones de Accesos" type="object" class="btn-primary"/>
                     <group>
                         <group string="Configuración de Confianza">
                             <field name="x_nivel_confianza" widget="priority"/>
@@ -79,6 +80,25 @@
                         </tree>
                     </field>
                 </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="vista_formulario_contactos_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.smart.button</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_ver_analisis_horario_individual" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-shield"
+                        help="Ver análisis de accesos por franjas horarias para este usuario">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Análisis de accesos</span>
+                    </div>
+                </button>
             </xpath>
         </field>
     </record>
@@ -125,7 +145,7 @@
             <search string="Buscar Sesiones">
                 <field name="partner_id"/>
                 <field name="x_ip"/>
-                <filter string="Accesos de Madrugada" name="madrugada" domain="[('x_franja_horaria', '=', 'Madrugada (0-6h)')]"/>
+                <filter string="Accesos de Madrugada" name="madrugada" domain="[('x_franja_horaria', '=', '1. Madrugada (0-6h)')]"/>
                 <filter string="Riesgo Alto" name="alto_riesgo" domain="[('x_nivel_riesgo', '=', 'alto')]"/>
                 <separator/>
                 <group expand="0" string="Agrupar por...">
