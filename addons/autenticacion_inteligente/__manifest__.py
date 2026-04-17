@@ -1,9 +1,9 @@
 {
-    'name': 'Autenticacion Inteligente Básica',
+    'name': 'Autenticacion Inteligente y Detección de fraude',
     'version': '1.0',
-    'summary': 'Módulo personalizado de autenticación inteligente básica para Odoo',
-    'description': 'Este módulo proporciona funcionalidades básicas de autenticación inteligente para mejorar la seguridad en Odoo.',
-    'author': 'Jesús Benítez Pitt',
+    'summary': 'Módulo orientado a mejorar la seguridad con autenticación inteligente y detección de actividad sospechosa mediante IA',
+    'description': 'Este módulo proporciona funcionalidades de autenticación inteligente y detección de actividad sospechosa mediante IA para mejorar la seguridad en el sistema.',
+    'author': 'Securenet',
     'category': 'Custom',
     'depends': ['base'],
     'data': [

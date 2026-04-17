@@ -35,7 +35,7 @@ class InformeFranjasHorarias(models.Model):
                     COUNT(*) AS total_accesos, -- Cuenta el total de registros en cada franja
                     -- Sumamos 1 solo cuando el riesgo es alto para obtener el total de alertas
                     SUM(CASE WHEN x_nivel_riesgo = 'alto' THEN 1 ELSE 0 END) AS alertas_ia
-                FROM autenticacion_sesion_log
+                FROM authentication_sesion_log
                 GROUP BY franja_horaria -- Agrupa los resultados por el nombre de la franja
             )
         """ % self._table)
