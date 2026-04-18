@@ -18,14 +18,14 @@ class Usuario(models.Model):
     x_timestamp_bloqueo = fields.Datetime(string="Último Bloqueo de Cuenta")
     
     # Relación inversa para mostrar los logs de este usuario específico
-    x_session_log_ids = fields.One2many('autenticacion.sesion.log', 'partner_id', string="Logs de Acceso")
+    x_session_log_ids = fields.One2many('authentication.sesion.log', 'partner_id', string="Logs de Acceso")
 
     def action_ver_analisis_horario_individual(self):
         """ Abre una vista de gráfico filtrada solo para los accesos de este usuario """
         return {
             'name': f'Análisis de accesos de: {self.name}',
             'type': 'ir.actions.act_window',
-            'res_model': 'autenticacion.sesion.log',
+            'res_model': 'authentication.sesion.log',
             'view_mode': 'graph',
             'domain': [('partner_id', '=', self.id)],
             'context': {
@@ -42,7 +42,7 @@ class Usuario(models.Model):
         # Creamos 10 registros en horario laboral (9h a 18h)
         for i in range(10):
             hora_random = random.randint(9, 18)
-            self.env['autenticacion.sesion.log'].create({
+            self.env['authentication.sesion.log'].create({
                 'partner_id': self.id,
                 'x_fecha_inicio': datetime.now().replace(hour=hora_random),
                 'x_ip': f'127.0.0.{i}',
@@ -53,7 +53,7 @@ class Usuario(models.Model):
             })
 
         # 2. PRUEBA DE FUEGO PARA LA IA
-        log_model = self.env['autenticacion.sesion.log']
+        log_model = self.env['authentication.sesion.log']
 
         # Caso A: Acceso dentro del horario habitual (Debe ser riesgo BAJO)
         riesgo_a = log_model.analizar_anomalia(self.id, 14, 0)

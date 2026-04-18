@@ -2,8 +2,8 @@ from odoo import models, fields, api
 from sklearn.ensemble import IsolationForest
 import pytz
 
-class AutenticacionSesionLog(models.Model):
-    _name = 'autenticacion.sesion.log'
+class AuthenticationSessionLog(models.Model):
+    _name = 'authentication.sesion.log'
     _description = 'Log de Auditoría de Seguridad'
     _order = 'x_fecha_inicio desc'
 

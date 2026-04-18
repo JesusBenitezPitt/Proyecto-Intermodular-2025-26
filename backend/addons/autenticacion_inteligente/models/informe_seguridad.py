@@ -30,7 +30,7 @@ class InformeSeguridad(models.Model):
                     x_ip,
                     -- Contamos el número de registros que coinciden con el estado 'fallo'
                     count(*) as total_fallos
-                FROM autenticacion_sesion_log
+                FROM authentication_sesion_log
                 WHERE x_estado_intento = 'fallo'
                 -- Agrupamos para ver el total de fallos por cada combinación de Usuario e IP
                 GROUP BY partner_id, x_ip

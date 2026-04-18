@@ -73,7 +73,7 @@ class ResUsersLogin(models.Model):
                     })
 
                     # Registramos el log de bloqueo definitivo
-                    env['autenticacion.sesion.log'].sudo().create({
+                    env['authentication.sesion.log'].sudo().create({
                         'partner_id': user.partner_id.id,
                         'x_ip': ip,
                         'x_navegador': navegador,
@@ -100,7 +100,7 @@ class ResUsersLogin(models.Model):
                     intentos_previos = INTENTOS.get(login, 0)
                     
                     # LLAMADA A LA IA: Analizamos si este éxito es una anomalía horaria
-                    log_obj = env['autenticacion.sesion.log'].sudo()
+                    log_obj = env['authentication.sesion.log'].sudo()
                     nivel_ia = log_obj.analizar_anomalia(user.partner_id.id, datetime.now().hour, intentos_previos)
 
                     # Actualizamos última conexión y creamos el registro de éxito

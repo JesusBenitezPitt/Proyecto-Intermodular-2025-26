@@ -1,12 +1,12 @@
 <odoo>
     <record id="accion_sesion_log" model="ir.actions.act_window">
         <field name="name">Log de Sesiones</field>
-        <field name="res_model">autenticacion.sesion.log</field>
+        <field name="res_model">authentication.sesion.log</field>
         <field name="view_mode">tree,pivot,graph,form</field> </record>
 
     <record id="action_log_riesgo_alto" model="ir.actions.act_window">
         <field name="name">Alertas de Riesgo Alto</field>
-        <field name="res_model">autenticacion.sesion.log</field>
+        <field name="res_model">authentication.sesion.log</field>
         <field name="view_mode">tree,form,graph</field>
         <field name="domain">[('x_nivel_riesgo', 'in', ['alto'])]</field>
         <field name="help" type="html">
@@ -15,8 +15,8 @@
     </record>
 
     <record id="vista_sesion_log_list" model="ir.ui.view">
-        <field name="name">autenticacion.sesion.log.list</field>
-        <field name="model">autenticacion.sesion.log</field>
+        <field name="name">authentication.sesion.log.list</field>
+        <field name="model">authentication.sesion.log</field>
         <field name="arch" type="xml">
             <tree string="Log de Sesiones" decoration-danger="x_nivel_riesgo in ('alto')" create="false">
                 <field name="partner_id"/>
@@ -31,8 +31,8 @@
     </record>
 
     <record id="vista_sesion_log_pivot" model="ir.ui.view">
-        <field name="name">autenticacion.sesion.log.pivot</field>
-        <field name="model">autenticacion.sesion.log</field>
+        <field name="name">authentication.sesion.log.pivot</field>
+        <field name="model">authentication.sesion.log</field>
         <field name="arch" type="xml">
             <pivot string="Análisis de Fraude">
                 <field name="x_ip" type="row"/> <field name="x_nivel_riesgo" type="col"/> <field name="partner_id" type="row"/>
@@ -41,8 +41,8 @@
     </record>
 
     <record id="vista_sesion_log_graph" model="ir.ui.view">
-        <field name="name">autenticacion.sesion.log.graph</field>
-        <field name="model">autenticacion.sesion.log</field>
+        <field name="name">authentication.sesion.log.graph</field>
+        <field name="model">authentication.sesion.log</field>
         <field name="arch" type="xml">
             <graph string="Evolución de Intentos Fallidos" type="line" sample="1">
                 <field name="x_fecha_inicio" interval="day"/>
@@ -105,7 +105,7 @@
 
     <record id="accion_informe_sql" model="ir.actions.act_window">
         <field name="name">Análisis de Rastro Digital (SQL)</field>
-        <field name="res_model">autenticacion_inteligente.informe_seguridad</field>
+        <field name="res_model">authentication_inteligente.informe_seguridad</field>
         <field name="view_mode">tree,pivot</field>
     </record>
 
@@ -139,8 +139,8 @@
     </record>
 
     <record id="view_sesion_log_search" model="ir.ui.view">
-        <field name="name">autenticacion.sesion.log.search</field>
-        <field name="model">autenticacion.sesion.log</field>
+        <field name="name">authentication.sesion.log.search</field>
+        <field name="model">authentication.sesion.log</field>
         <field name="arch" type="xml">
             <search string="Buscar Sesiones">
                 <field name="partner_id"/>
@@ -157,10 +157,10 @@
         </field>
     </record>
 
-    <menuitem id="menu_autenticacion_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security" groups="base.group_system"/>
-    <menuitem id="menu_autenticacion_perfiles" parent="menu_autenticacion_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
-    <menuitem id="menu_autenticacion_sesiones" parent="menu_autenticacion_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
-    <menuitem id="menu_autenticacion_alertas" parent="menu_autenticacion_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>
-    <menuitem id="menu_autenticacion_sql" parent="menu_autenticacion_basica_root" name="Consulta SQL Tiempo Real" action="accion_informe_sql" sequence="40"/>
-    <menuitem id="menu_reporte_patrones" parent="menu_autenticacion_basica_root" name="Estadísticas por Franjas Horarias" action="action_report_franjas_horarias" sequence="50"/>
+    <menuitem id="menu_authentication_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security" groups="base.group_system"/>
+    <menuitem id="menu_authentication_perfiles" parent="menu_authentication_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
+    <menuitem id="menu_authentication_sesiones" parent="menu_authentication_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
+    <menuitem id="menu_authentication_alertas" parent="menu_authentication_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>
+    <menuitem id="menu_authentication_sql" parent="menu_authentication_basica_root" name="Consulta SQL Tiempo Real" action="accion_informe_sql" sequence="40"/>
+    <menuitem id="menu_reporte_patrones" parent="menu_authentication_basica_root" name="Estadísticas por Franjas Horarias" action="action_report_franjas_horarias" sequence="50"/>
 </odoo>

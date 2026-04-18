@@ -10,6 +10,7 @@ para detectar comportamientos sospechosos y prevenir accesos fraudulentos a la p
 - **PostgreSQL 15** — Base de datos
 - **XML** — Definición de vistas e informes
 - **Docker / Docker Compose** — Entorno de desarrollo
+- **Scikit-Learning** — Motor de Machine Learning
 
 ## Requisitos previos
 - Docker y Docker Compose instalado
@@ -56,7 +57,7 @@ Este es el script de python que he usado para generar los datos de entrenamiento
         # Creamos 10 registros en horario laboral (9h a 18h)
         for i in range(10):
             hora_random = random.randint(9, 18)
-            self.env['autenticacion.sesion.log'].create({
+            self.env['authentication.sesion.log'].create({
                 'partner_id': self.id,
                 'x_fecha_inicio': datetime.now().replace(hour=hora_random),
                 'x_ip': f'127.0.0.{i}',
@@ -67,7 +68,7 @@ Este es el script de python que he usado para generar los datos de entrenamiento
             })
 
         # 2. PRUEBA DE FUEGO PARA LA IA
-        log_model = self.env['autenticacion.sesion.log']
+        log_model = self.env['authentication.sesion.log']
 
         # Caso A: Acceso dentro del horario habitual (Debe ser riesgo BAJO)
         riesgo_a = log_model.analizar_anomalia(self.id, 14, 0)
