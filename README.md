@@ -108,7 +108,7 @@ Este es el script de python que he usado para generar los datos de entrenamiento
 - [X] Cálculo automático del nivel de riesgo mediante IA
 - [ ] Notificaciones al administrador ante accesos sospechosos
 - [ ] Notificación al usuario de confirmación de acceso a la cuenta
-- [ ] Cálculo del nivel de riesgo mediante geolocalización
+- [X] Cálculo del nivel de riesgo mediante geolocalización
 - [x] Informe de patrones temporales por franja horaria
 
 ## Autor
