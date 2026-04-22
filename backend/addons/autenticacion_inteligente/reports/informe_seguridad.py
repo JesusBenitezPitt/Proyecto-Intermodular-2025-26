@@ -1,8 +1,8 @@
 from odoo import models, fields, api, tools
 
 class InformeSeguridad(models.Model):
-    _name = 'autenticacion_inteligente.informe_seguridad'
-    _description = 'Análisis de Fraude por SQL'
+    _name = 'authentication_inteligente.informe_seguridad'
+    _description = 'Análisis de Fraude'
     
     # Indicamos que Odoo no cree una tabla física; usaremos una vista SQL dinámica
     _auto = False

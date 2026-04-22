@@ -1,6 +1,8 @@
 from odoo import models, fields, api
 from sklearn.ensemble import IsolationForest
-import pytz
+import pytz, logging
+
+_logger = logging.getLogger(__name__)
 
 class AuthenticationSessionLog(models.Model):
     _name = 'authentication.sesion.log'
@@ -57,30 +59,62 @@ class AuthenticationSessionLog(models.Model):
 
     @api.model
     def analizar_anomalia(self, partner_id, hora_actual, intentos):
-        """ Motor de IA que detecta si un acceso es sospechoso comparándolo con el historial """
         tz = pytz.timezone('Europe/Madrid')
-
-        # Obtenemos los accesos pasados del usuario para aprender su patrón
-        logs_previos = self.search_read([('partner_id', '=', partner_id)], ['x_fecha_inicio', 'x_intentos_fallidos'])
         
-        # Necesitamos un mínimo de 5 registros para que la IA tenga datos suficientes
-        if len(logs_previos) < 5:
+        logs_previos = self.search_read(
+            [('partner_id', '=', partner_id)], 
+            ['x_fecha_inicio', 'x_intentos_fallidos', 'x_ip', 'x_navegador'],
+            limit=100,
+            order='x_fecha_inicio desc'
+        )
+
+        if len(logs_previos) < 10:
             return 'bajo'
 
-        # Preparamos la lista de datos (Hora e Intentos) para la IA
+        # === FEATURES DEL MODELO ===
         X = []
+        ips_conocidas = set()
+        navegadores_conocidos = set()
+        
         for l in logs_previos:
             if l['x_fecha_inicio']:
-                # Aseguramos que la IA aprenda de horas locales, no UTC
                 fecha_local = pytz.utc.localize(l['x_fecha_inicio']).astimezone(tz)
-                X.append([fecha_local.hour, l['x_intentos_fallidos']])
+                X.append([
+                    fecha_local.hour,
+                    fecha_local.weekday(),
+                    l['x_intentos_fallidos']
+                ])
+                ips_conocidas.add(l['x_ip'])
+                navegadores_conocidos.add(l['x_navegador'])
         
-        # Configuramos el modelo de detección (Isolation Forest)
-        clf = IsolationForest(contamination=0.1, random_state=42)
+        # === ENTRENAR EL MODELO ===
+        clf = IsolationForest(
+            contamination=0.05,
+            random_state=42,
+            n_estimators=100
+        )
         clf.fit(X)
         
-        # Predecimos si el acceso actual se aleja mucho de lo normal
-        prediccion = clf.predict([[hora_actual, intentos]])
+        # === ANÁLISIS DEL ACCESO ACTUAL ===
+        from datetime import datetime
+        dia_semana = datetime.now().weekday()
         
-        # Si la predicción es -1, es que ha detectado una anomalía
-        return 'alto' if prediccion[0] == -1 else 'bajo'
+        prediccion = clf.predict([[hora_actual, dia_semana, intentos]])
+        score = clf.score_samples([[hora_actual, dia_semana, intentos]])[0]
+        
+        # === CRITERIOS DE RIESGO (AJUSTADOS) ===
+        es_anomalia_patron = prediccion[0] == -1 or score < -0.3
+        es_muchos_intentos = intentos >= 3  # 3+ intentos = alto riesgo
+        es_madrugada = hora_actual <= 6 or hora_actual >= 22  # Fuera de horario
+        
+        _logger.info(
+            f"✓ Usuario {partner_id} | Hora: {hora_actual}h | Intentos: {intentos} | "
+            f"Score: {score:.3f} | Anomalía patrón: {es_anomalia_patron}"
+        )
+        
+        # === LÓGICA FINAL DE DECISIÓN ===
+        # ALTO RIESGO si: (muchos intentos + madrugada) O (anomalía de patrón + intentos)
+        if (es_muchos_intentos and es_madrugada) or (es_anomalia_patron and intentos > 0):
+            return 'alto'
+        else:
+            return 'bajo'

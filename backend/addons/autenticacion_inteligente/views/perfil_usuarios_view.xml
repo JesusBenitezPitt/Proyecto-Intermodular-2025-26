@@ -106,8 +106,19 @@
     <record id="accion_informe_sql" model="ir.actions.act_window">
         <field name="name">Análisis de Rastro Digital (SQL)</field>
         <field name="res_model">authentication_inteligente.informe_seguridad</field>
-        <field name="view_mode">tree,pivot</field>
+        <field name="view_mode">graph,tree,pivot</field>
     </record>
+
+    <record id="view_informe_seguridad_graph" model="ir.ui.view">
+    <field name="name">authentication_inteligente.informe_seguridad.graph</field>
+    <field name="model">authentication_inteligente.informe_seguridad</field>
+    <field name="arch" type="xml">
+        <graph string="Ranking de IPs Sospechosas" type="bar">
+            <field name="x_ip"/>
+            <field name="total_fallos" type="measure"/>
+        </graph>
+    </field>
+</record>
 
     <record id="action_report_franjas_horarias" model="ir.actions.act_window">
         <field name="name">Informe de Franjas Horarias</field>

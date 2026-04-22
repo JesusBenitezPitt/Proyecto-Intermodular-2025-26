@@ -8,7 +8,7 @@ services: # Aquí empieza la lista de programas que vamos a usar
       - "8069:8069" # Entra por el 8069 de mi PC al 8069 de Odoo
     volumes: # Carpetas compartidas:
       - odoo-data:/var/lib/odoo # Guarda aquí las fotos y cosas de Odoo
-      - ./addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
+      - ./backend/addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
     environment: # Ajustes para que Odoo sepa hablar con la DB:
       - HOST=db # El servidor de la DB se llama "db"
       - USER=odoo # El usuario es "odoo"
