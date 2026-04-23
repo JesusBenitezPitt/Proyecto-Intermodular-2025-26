@@ -5,7 +5,7 @@ services: # Aquí empieza la lista de programas que vamos a usar
     depends_on: # No arranques Odoo hasta que...
       - db # ...la base de datos esté encendida
     ports: # Conexión de puertos:
-      - "8069:8069" # Entra por el 8069 de mi PC al 8069 de Odoo
+      - "0.0.0.0:8069:8069" # Entra por el 8069 de mi PC al 8069 de Odoo
     volumes: # Carpetas compartidas:
       - odoo-data:/var/lib/odoo # Guarda aquí las fotos y cosas de Odoo
       - ./backend/addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
