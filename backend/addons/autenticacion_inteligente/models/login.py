@@ -39,7 +39,7 @@ class ResUsersLogin(models.Model):
         ua_raw = request.httprequest.user_agent.string or 'Desconocido'
         navegador = cls._parse_user_agent(cls, ua_raw)
 
-        # 1. VERIFICACIÓN PREVIA: ¿La cuenta ya está bloqueada?
+        # Verificación previa del bloqueo de la cuenta.
         with cls.pool.cursor() as cr:
             env = api.Environment(cr, 1, {})
             user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
@@ -47,7 +47,7 @@ class ResUsersLogin(models.Model):
                 _logger.warning("Acceso denegado: Usuario '%s' bloqueado.", login)
                 raise AccessError("Cuenta bloqueada por seguridad. Contacte con el administrador.")
 
-        # 2. INTENTO DE AUTENTICACIÓN REAL
+        # Intentamos autenticar usando el método original de Odoo
         try:
             auth_result = super()._login(db, login, password, user_agent_env=user_agent_env)
         except Exception as e:
@@ -56,7 +56,7 @@ class ResUsersLogin(models.Model):
 
         estado = 'exito' if auth_result else 'fallo'
 
-        # 3. GESTIÓN DE FALLOS Y BLOQUEOS
+        # Gestionamos el resultado del intento de autenticación
         if estado == 'fallo':
             # Incrementamos contador de fallos en el diccionario global
             INTENTOS[login] = INTENTOS.get(login, 0) + 1
@@ -87,25 +87,31 @@ class ResUsersLogin(models.Model):
                     if login in INTENTOS: del INTENTOS[login]
 
                 if error_auth: raise error_auth
-        
-        # 4. GESTIÓN DE ÉXITO Y ANÁLISIS DE IA
         else:
             try:
                 with cls.pool.cursor() as cr:
                     env = api.Environment(cr, 1, {})
                     user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
-
+                    partner = user.partner_id
                     if not user: return auth_result
-                    
-                    intentos_previos = INTENTOS.get(login, 0)
-                    
-                    # LLAMADA A LA IA: Analizamos si este éxito es una anomalía horaria
-                    log_obj = env['authentication.sesion.log'].sudo()
-                    nivel_ia = log_obj.analizar_anomalia(user.partner_id.id, datetime.now().hour, intentos_previos)
 
-                    # Actualizamos última conexión y creamos el registro de éxito
-                    user.partner_id.write({'x_ultima_conexion': datetime.now()})
-                    log_obj.create({
+                    if not partner.x_firebase_token:
+                        _logger.warning("Acceso denegado: El usuario '%s' no tiene la App vinculada.", login)
+                        raise AccessError("Su cuenta requiere vinculación con la App móvil. \nContacte con el administrador o inicie sesión desde la App.")
+                        
+                    datos_localizacion = env['authentication.sesion.log'].sudo().obtener_datos_geograficos(ip)
+
+                    lat = datos_localizacion['lat']
+                    lng = datos_localizacion['lng']
+                    loc_nombre = datos_localizacion['texto']
+
+                    intentos_previos = INTENTOS.get(login, 0)
+                    hora_actual = datetime.now().hour
+                    
+                    log_obj = env['authentication.sesion.log'].sudo()
+                    nivel_ia = log_obj.analizar_anomalia(user.partner_id.id, hora_actual, intentos_previos, lat, lng)
+
+                    log_rec = log_obj.create({
                         'partner_id': user.partner_id.id,
                         'x_ip': ip,
                         'x_navegador': navegador,
@@ -113,14 +119,29 @@ class ResUsersLogin(models.Model):
                         'x_estado_intento': 'exito',
                         'x_intentos_fallidos': intentos_previos,
                         'x_nivel_riesgo': nivel_ia,
-                        'x_alerta_seguridad': 'Acceso validado por IA: Riesgo %s' % nivel_ia
+                        'x_latitud': lat,
+                        'x_longitud': lng,
+                        'x_localizacion': loc_nombre,
+                        'x_alerta_seguridad': 'Análisis IA (%s) en %s' % (nivel_ia, loc_nombre)
                     })
-                    cr.commit()
 
-                    # Limpiamos intentos fallidos de la memoria tras el éxito
+                    notif_2fa = log_rec._generar_2fa()
+
+                    env['notificaciones_movil'].sudo().create({
+                        'x_user_id': user.id,
+                        'x_titulo': 'Nuevo inicio de sesión detectado',
+                        'x_mensaje': f'Se ha detectado un nuevo inicio de sesión desde {loc_nombre}.',
+                        'x_log_id': log_rec.id,
+                        'x_tipo_alerta': 'warning'
+                    })
+
+                    request.session['tfg_log_id'] = log_rec.id
+                    request.session['tfg_notif_id'] = notif_2fa.id
+
+                    cr.commit()
                     if login in INTENTOS: del INTENTOS[login]
 
             except Exception as e:
-                _logger.error("Error en el registro de log post-login: %s", e)
+                _logger.error("Error en el registro de log: %s", e)
 
         return auth_result

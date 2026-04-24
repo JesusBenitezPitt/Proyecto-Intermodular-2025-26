@@ -13,6 +13,7 @@ services: # Aquí empieza la lista de programas que vamos a usar
       - HOST=db # El servidor de la DB se llama "db"
       - USER=odoo # El usuario es "odoo"
       - PASSWORD=odoo # La contraseña es "odoo"
+      - FIREBASE_KEY=BOgHtW2Wo2SOEKX76hx66A15FJ4-8UU70oGIy9FK-e_Q8zqPfkys-j11WkHXhEHDrZ1CmXX1HFnHkgU6giVXxuE # Clave de Firebase para notificaciones
     user: root # Se hace todo como root para que no pida permisos
 
   db: # El segundo contenedor es la Base de Datos

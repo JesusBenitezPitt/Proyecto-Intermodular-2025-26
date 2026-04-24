@@ -15,28 +15,22 @@ class AuthenticationSessionLog(models.Model):
     # --- CAMPOS DEL MODELO ---
     partner_id = fields.Many2one('res.partner', string='Usuario', required=True, readonly=True)
     admin_id = fields.Many2one('res.users', string='Admin Responsable')
-
     x_fecha_inicio = fields.Datetime(string='Fecha Inicio', default=fields.Datetime.now, readonly=True)
     x_intentos_fallidos = fields.Integer(string='Intentos Fallidos', readonly=True)
-    
     x_nivel_riesgo = fields.Selection([
         ('bajo', 'Bajo'),
         ('alto', 'Alto')
     ], string='Nivel de Riesgo', default='bajo')
-    
     x_alerta_seguridad = fields.Char(string='Alertas o eventos de seguridad', readonly=True)
     x_ip = fields.Char(string='Dirección IP', readonly=True)
     x_navegador = fields.Char(string='Navegador', readonly=True)
-    
     x_estado_intento = fields.Selection([
         ('exito', 'Éxito'),
         ('fallo', 'Fallo'),
         ('bloqueo', 'Bloqueado')
     ], string='Resultado', readonly=True)
-
     x_franja_horaria = fields.Char(string="Franja Horaria", compute="_compute_franja_horaria", store=True)
     x_localizacion = fields.Char(string='Localización', readonly=True)
-
     x_latitud = fields.Float(string='Latitud', digits=(10, 7), readonly=True)
     x_longitud = fields.Float(string='Longitud', digits=(10, 7), readonly=True)
 
@@ -135,3 +129,60 @@ class AuthenticationSessionLog(models.Model):
         except:
             pass
         return {'texto': 'Desconocida', 'lat': 0.0, 'lng': 0.0}
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Creamos el log
+        records = super(AuthenticationSessionLog, self).create(vals_list)
+        
+        for rec in records:
+            # Ejecutamos el proceso de notificación
+            self._preparar_notificaciones(rec)
+            
+        return records
+
+    def _preparar_notificaciones(self, log_record):
+        # Buscamos al usuario
+        user_target = self.env['res.users'].sudo().search([('partner_id', '=', log_record.partner_id.id)], limit=1)
+        
+        # Buscamos a los administradores
+        admins = self.env['res.users'].sudo().search([
+            ('groups_id', 'in', self.env.ref('base.group_system').id)
+        ])
+
+        # Notificación al usuario
+        if user_target:
+            self.env['notificaciones_movil'].sudo().create({
+                'x_user_id': user_target.id,
+                'x_titulo': "Nuevo inicio de sesión detectado",
+                'x_mensaje': f"Se ha detectado un nuevo inicio de sesión desde {log_record.x_localizacion}.",
+                'x_tipo_alerta': 'warning',
+                'x_log_id': log_record.id
+            })
+
+        # Notificación a los administradores
+        for admin in admins:
+            if admin.id != user_target.id: # Evitar duplicar si el admin es el que entra
+                self.env['notificaciones_movil'].sudo().create({
+                    'x_user_id': admin.id,
+                    'x_titulo': "Se ha detectado un inicio de sesión",
+                    'x_mensaje': f"Se ha detectado un nuevo inicio de sesión desde {log_record.x_localizacion}, nivel de riesgo: {log_record.x_nivel_riesgo}.",
+                    'x_tipo_alerta': 'warning',
+                    'x_log_id': log_record.id
+                })
+
+    def _generar_2fa(self):
+        self.ensure_one()
+        user = self.env['res.users'].sudo().search([('partner_id', '=', self.partner_id.id)], limit=1)
+        
+        # Creamos la notificación que la App interceptará como Solicitud de Acceso.
+        notif = self.env['notificaciones_movil'].sudo().create({
+            'x_user_id': user.id,
+            'x_titulo': 'Confirmar inicio de sesión',
+            'x_mensaje': f'¿Estás intentando acceder desde {self.x_localizacion}?',
+            'x_log_id': self.id,
+            'x_tipo_alerta': 'warning',
+            'x_estado_aprobacion': 'pending'
+        })
+        
+        return notif

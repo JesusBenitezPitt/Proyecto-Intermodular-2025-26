@@ -4,7 +4,6 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function NotFoundScreen() {
   return (
     <>
-      {/* Esto configura el título de la cabecera dinámicamente */}
       <Stack.Screen options={{ title: '¡Ups!' }} />
       
       <View style={styles.container}>

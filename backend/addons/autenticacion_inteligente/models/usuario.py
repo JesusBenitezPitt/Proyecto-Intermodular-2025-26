@@ -8,21 +8,18 @@ _logger = logging.getLogger(__name__)
 class Usuario(models.Model):
     _inherit = 'res.partner'
 
-    # --- CONFIGURACIÓN DE SEGURIDAD DEL USUARIO ---
     x_nivel_confianza = fields.Selection([
         ('bajo', 'Bajo'),
         ('alto', 'Alto')
-    ], string="Nivel de Confianza (IA)", default='bajo')
-
+    ], string="Nivel de confianza del usuario", default='bajo')
     x_limite_intentos = fields.Integer(string="Límite Intentos Máximos", default=3)
     x_is_blocked = fields.Boolean(string="Bloqueo Manual/IA", default=False)
     x_ultima_conexion = fields.Datetime(string="Última Conexión Exitosa")
     x_timestamp_bloqueo = fields.Datetime(string="Último Bloqueo de Cuenta")
-    
     x_session_log_ids = fields.One2many('authentication.sesion.log', 'partner_id', string="Logs de Acceso")
-
     x_device_token = fields.Char(string='Token de Dispositivo Móvil')
     x_2fa_enabled = fields.Boolean(string='2FA Activo en Móvil', default=False)
+    x_firebase_token = fields.Char(string='Token de Firebase')
 
     def action_ver_analisis_horario_individual(self):
         """ Abre una vista de gráfico filtrada solo para los accesos de este usuario """

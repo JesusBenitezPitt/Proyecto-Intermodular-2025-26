@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "309692822882",
+    "project_id": "proyecto-odoo-273d0",
+    "storage_bucket": "proyecto-odoo-273d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309692822882:android:45814fe2015030daf5a83b",
+        "android_client_info": {
+          "package_name": "com.proyecto.movilproyecto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWdI2GZraSgVKeR2s49sSmqgcv8X2XJpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

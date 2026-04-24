@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { login } from '../../api/odoo'; // Importa la función que ya probamos
+import { login } from '../../services/odooService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -15,36 +15,35 @@ export default function LoginScreen() {
       return;
     }
 
-    console.log("--- INICIANDO LOGIN ---");
-    console.log("Credenciales:", email, "****");
-
     try {
       const res = await login(email, password);
-      console.log("Respuesta cruda de Odoo:", JSON.stringify(res));
 
       if (res.result && res.result.status === 'success') {
-        const { session_id, name } = res.result.data;
-        console.log("Login exitoso. Usuario:", name);
-        console.log("Guardando sesión...");
+        const { session_id, name, photo, log_id, notification_id } = res.result.data;
 
         await AsyncStorage.multiSet([
           ['session_id', session_id],
-          ['user_name', name]
+          ['user_name', name],
+          ['user_photo', photo || '']
         ]);
 
-        console.log("Sesión guardada. Intentando navegar a (tabs)...");
-        
-        // CAMBIO: Si /(tabs) falla, intenta solo '/' o '/(tabs)/index'
-        router.replace('/(tabs)'); 
+        console.log("Login exitoso. Usuario:", name);
+
+        if (log_id) {
+          console.log("Acceso pendiente de validación 2FA");
+          router.replace({
+            pathname: '/validate_2fa',
+            params: { logId: log_id, notifId: notification_id }
+          });
+        } else {
+          router.replace('/(tabs)');
+        }
         
       } else {
-        console.warn("Login fallido: Credenciales incorrectas o formato de respuesta inesperado");
-        Alert.alert("Error", "Correo o contraseña incorrectos");
+        const errorMsg = res.result?.message || "Correo o contraseña incorrectos";
+        Alert.alert("Acceso Denegado", errorMsg);
       }
     } catch (error) {
-      console.error("--- ERROR CRÍTICO EN LOGIN ---");
-      console.error("Mensaje:", error.message);
-      console.error("Stack:", error.stack);
       Alert.alert("Error de conexión", "No se pudo conectar con el servidor Odoo");
     }
   };
@@ -52,13 +51,16 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Seguridad Odoo</Text>
+      
       <TextInput 
         placeholder="Correo electrónico" 
         value={email} 
         onChangeText={setEmail} 
         style={styles.input}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
+      
       <TextInput 
         placeholder="Contraseña" 
         value={password} 
@@ -66,6 +68,7 @@ export default function LoginScreen() {
         secureTextEntry 
         style={styles.input}
       />
+      
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>

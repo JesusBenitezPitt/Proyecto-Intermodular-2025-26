@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import UserProfileHeader from '../../components/UserProfileHeader';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
@@ -7,28 +7,37 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#714B67',
+        tabBarInactiveTintColor: 'gray',
         headerShown: true,
-        tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-        },
-      }}>
-      <Tabs.Screen
-        name="index"
+        header: () => <UserProfileHeader />, 
+      }}
+    >
+      <Tabs.Screen 
+        name="index" 
         options={{
-          title: 'Accesos',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="shield-checkmark" size={size} color={color} />
+          title: 'Logs',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons 
+              name={focused ? 'list-circle' : 'list-circle-outline'} 
+              size={size} 
+              color={color} 
+            />
           ),
-        }}
+        }} 
       />
+
       <Tabs.Screen
-        name="explore"
+        name="notifications"
         options={{
-          title: 'Mi Perfil',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle" size={size} color={color} />
+          title: 'Notificaciones',
+          tabBarBadge: 1,
+          tabBarBadgeStyle: { backgroundColor: '#d9534f' },
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons 
+              name={focused ? 'notifications' : 'notifications-outline'} 
+              size={size} 
+              color={color} 
+            />
           ),
         }}
       />

@@ -2,6 +2,11 @@
   "expo": {
     "name": "MovilProyecto",
     "slug": "MovilProyecto",
+    "extra": {
+      "eas": {
+        "projectId": "da72762b-367c-4603-ab5a-9f2f44fb3a2e" 
+      } 
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,6 +17,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.proyecto.movilproyecto",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
