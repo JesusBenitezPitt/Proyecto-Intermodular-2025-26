@@ -4,7 +4,7 @@ import requests, logging, os
 _logger = logging.getLogger(__name__)
 
 class NotificacionesMovil(models.Model):
-    _name = 'notificaciones_movil'
+    _name = 'notificaciones.movil'
     _description = 'Registro de Notificaciones Push'
 
     x_user_id = fields.Many2one('res.users', string='Usuario Destinatario', required=True)

@@ -127,7 +127,7 @@ class ResUsersLogin(models.Model):
 
                     notif_2fa = log_rec._generar_2fa()
 
-                    env['notificaciones_movil'].sudo().create({
+                    env['notificaciones.movil'].sudo().create({
                         'x_user_id': user.id,
                         'x_titulo': 'Nuevo inicio de sesión detectado',
                         'x_mensaje': f'Se ha detectado un nuevo inicio de sesión desde {loc_nombre}.',

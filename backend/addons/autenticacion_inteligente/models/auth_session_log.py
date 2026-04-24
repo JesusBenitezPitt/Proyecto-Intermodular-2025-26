@@ -152,7 +152,7 @@ class AuthenticationSessionLog(models.Model):
 
         # Notificación al usuario
         if user_target:
-            self.env['notificaciones_movil'].sudo().create({
+            self.env['notificaciones.movil'].sudo().create({
                 'x_user_id': user_target.id,
                 'x_titulo': "Nuevo inicio de sesión detectado",
                 'x_mensaje': f"Se ha detectado un nuevo inicio de sesión desde {log_record.x_localizacion}.",
@@ -163,7 +163,7 @@ class AuthenticationSessionLog(models.Model):
         # Notificación a los administradores
         for admin in admins:
             if admin.id != user_target.id: # Evitar duplicar si el admin es el que entra
-                self.env['notificaciones_movil'].sudo().create({
+                self.env['notificaciones.movil'].sudo().create({
                     'x_user_id': admin.id,
                     'x_titulo': "Se ha detectado un inicio de sesión",
                     'x_mensaje': f"Se ha detectado un nuevo inicio de sesión desde {log_record.x_localizacion}, nivel de riesgo: {log_record.x_nivel_riesgo}.",
@@ -176,7 +176,7 @@ class AuthenticationSessionLog(models.Model):
         user = self.env['res.users'].sudo().search([('partner_id', '=', self.partner_id.id)], limit=1)
         
         # Creamos la notificación que la App interceptará como Solicitud de Acceso.
-        notif = self.env['notificaciones_movil'].sudo().create({
+        notif = self.env['notificaciones.movil'].sudo().create({
             'x_user_id': user.id,
             'x_titulo': 'Confirmar inicio de sesión',
             'x_mensaje': f'¿Estás intentando acceder desde {self.x_localizacion}?',

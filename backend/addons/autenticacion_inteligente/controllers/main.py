@@ -21,23 +21,39 @@ class SecurityAppController(http.Controller):
 
             user = request.env['res.users'].browse(uid)
             is_admin = user.has_group('base.group_system')
+            partner = user.partner_id
 
             log_id = request.session.get('tfg_log_id')
             notif_id = request.session.get('tfg_notif_id')
 
-            return {
-                'status': 'success',
-                'data': {
-                    'user_id': user.id,
-                    'partner_id': user.partner_id.id,
-                    'name': user.name,
-                    'is_admin': is_admin,
-                    'session_id': request.session.sid,
-                    'log_id': log_id,
-                    'notification_id': notif_id,
-                    'photo': user.partner_id.image_128.decode('utf-8') if user.partner_id.image_128 else None
+            if partner.x_firebase_token:
+                return {
+                    'status': 'success',
+                    'data': {
+                        'user_id': user.id,
+                        'partner_id': user.partner_id.id,
+                        'name': user.name,
+                        'is_admin': is_admin,
+                        'session_id': request.session.sid,
+                        'log_id': log_id,
+                        'notification_id': notif_id,
+                        'photo': user.partner_id.image_128.decode('utf-8') if user.partner_id.image_128 else None
+                    }
                 }
-            }
+            else: 
+                return {
+                    'status': 'success',
+                    'data': {
+                        'user_id': user.id,
+                        'partner_id': user.partner_id.id,
+                        'name': user.name,
+                        'is_admin': is_admin,
+                        'session_id': request.session.sid,
+                        'log_id': False,
+                        'notification_id': notif_id,
+                        'photo': user.partner_id.image_128.decode('utf-8') if user.partner_id.image_128 else None
+                    }
+                }
         except Exception as e:
             _logger.error("Error en login API: %s", str(e))
             return {'status': 'error', 'message': 'Error en el servidor'}
@@ -74,7 +90,7 @@ class SecurityAppController(http.Controller):
 
     @http.route('/api/security/notifications', type='json', auth='user', methods=['POST'], csrf=False)
     def get_notifications(self, **post):
-        """ Obtiene las notificaciones reales de la tabla notificaciones_movil """
+        """ Obtiene las notificaciones reales de la tabla notificaciones.movil """
         user = request.env.user
         
         # Si es admin, ve todas. Si no, solo las suyas.
@@ -82,7 +98,7 @@ class SecurityAppController(http.Controller):
         if not user.has_group('base.group_system'):
             domain = [('x_user_id', '=', user.id)]
             
-        notifications = request.env['notificaciones_movil'].sudo().search_read(
+        notifications = request.env['notificaciones.movil'].sudo().search_read(
             domain, 
             ['x_titulo', 'x_mensaje', 'x_tipo_alerta', 'x_leida', 'create_date', 'x_log_id'],
             limit=20,
@@ -111,7 +127,7 @@ class SecurityAppController(http.Controller):
         if not notif_id:
             return {'status': 'error', 'message': 'ID no proporcionado'}
             
-        notification = request.env['notificaciones_movil'].sudo().browse(notif_id)
+        notification = request.env['notificaciones.movil'].sudo().browse(notif_id)
         if notification.exists():
             notification.write({'x_leida': True})
             return {'status': 'success'}
@@ -131,7 +147,7 @@ class SecurityAppController(http.Controller):
 
     @http.route('/api/security/validate_2fa', type='json', auth='user', methods=['POST'], csrf=False)
     def validate_2fa(self, notification_id, decision, **post):
-        notif = request.env['notificaciones_movil'].sudo().browse(notification_id)
+        notif = request.env['notificaciones.movil'].sudo().browse(notification_id)
         if not notif or notif.x_user_id.id != request.env.user.id:
             return {'status': 'error', 'message': 'Notificación no encontrada'}
 
