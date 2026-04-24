@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
-import * as Notifications from 'expo-notifications';
+// import * as Notifications from 'expo-notifications';
 
 export default function RootLayout() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,7 +27,8 @@ export default function RootLayout() {
   }, [segments]);
 
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+    /** 
+     * const subscription = Notifications.addNotificationResponseReceivedListener(response => {
       const data = response.notification.request.content.data;
       
       if (data.log_id) {
@@ -39,6 +40,7 @@ export default function RootLayout() {
     });
 
     return () => subscription.remove();
+     */
   }, []);
 
   if (!isLoaded) {
