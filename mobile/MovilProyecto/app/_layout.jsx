@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, ActivityIndicator } from 'react-native';
-// import * as Notifications from 'expo-notifications';
+import { View, ActivityIndicator, Alert } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 
 export default function RootLayout() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,20 +27,55 @@ export default function RootLayout() {
   }, [segments]);
 
   useEffect(() => {
-    /** 
-     * const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      const data = response.notification.request.content.data;
+    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
       
-      if (data.log_id) {
+      if (remoteMessage.data?.log_id) {
         router.push({
-          pathname: '/validate_2fa',
-          params: { logId: data.log_id, notifId: data.notification_id }
+          pathname: '/notifications',
+          params: { 
+            logId: remoteMessage.data.log_id, 
+            notifId: remoteMessage.data.notification_id 
+          }
         });
       }
     });
 
-    return () => subscription.remove();
-     */
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          if (remoteMessage.data?.log_id) {
+            setTimeout(() => {
+              router.push({
+                pathname: '/notifications',
+                params: { 
+                  logId: remoteMessage.data.log_id, 
+                  notifId: remoteMessage.data.notification_id 
+                }
+              });
+            }, 1000);
+          }
+        }
+      });
+
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      Alert.alert(
+        remoteMessage.notification?.title || 'Aviso de seguridad',
+        remoteMessage.notification?.body || 'Nuevo inicio de sesión detectado',
+        [
+          { text: 'Ver detalles', onPress: () => router.push({
+              pathname: '/notifications',
+              params: { logId: remoteMessage.data.log_id }
+          })},
+          { text: 'Cerrar', style: 'cancel' }
+        ]
+      );
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeForeground();
+    };
   }, []);
 
   if (!isLoaded) {

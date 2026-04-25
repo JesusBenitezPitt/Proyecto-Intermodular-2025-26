@@ -41,6 +41,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="validate_2fa"
+        options={{
+          href: null
+        }}
+      />
     </Tabs>
   );
 }

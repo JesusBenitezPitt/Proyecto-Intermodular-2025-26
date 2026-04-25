@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getNotifications, markAsRead } from '../../services/odooService';
 
 export default function ScreenNotifications() {
+  const { logId, notifId } = useLocalSearchParams();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -25,6 +26,13 @@ export default function ScreenNotifications() {
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  // Si venimos de una notificación push, marcarla como leída
+  useEffect(() => {
+  if (notifId && notifications.length > 0) {
+    handlePress(parseInt(notifId), false);
+  }
+}, [notifId, notifications.length]);
 
   // Función para cuando el usuario desliza hacia abajo para refrescar
   const onRefresh = () => {
@@ -66,7 +74,7 @@ export default function ScreenNotifications() {
         }
         renderItem={({ item }) => (
           <TouchableOpacity 
-            style={[styles.card, item.leida && styles.cardRead]} 
+            style={[styles.card, item.leida && styles.cardRead, item.id === notifId && styles.cardHighlighted]} 
             onPress={() => handlePress(item.id, item.leida)}
           >
             <View style={styles.iconContainer}>

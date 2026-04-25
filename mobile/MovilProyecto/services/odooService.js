@@ -3,19 +3,26 @@ import { ODOO_CONFIG } from '../constants/config';
 
 const fetchFromOdoo = async (endpoint, params = {}, useSession = true) => {
     const sessionId = useSession ? await AsyncStorage.getItem('session_id') : null;
+
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    if (sessionId) {
+        headers['Cookie'] = `session_id=${sessionId}`;
+        headers['X-Openerp-Session-Id'] = sessionId;
+    };
     
     const response = await fetch(`${ODOO_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(sessionId && { 'Cookie': `session_id=${sessionId}`, 'X-Openerp-Session-Id': sessionId })
-        },
+        headers: headers,
+        credentials: 'include',
         body: JSON.stringify({ params }),
     });
 
     const data = await response.json();
 
-    if (data.error && data.error.code === 100) {
+    if (data.error && (data.error.code === 100 || data.error.data?.message === 'Session expired')) {
         await AsyncStorage.removeItem('session_id');
         return null;
     }

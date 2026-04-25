@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 class SecurityAppController(http.Controller):
 
     # Endpoint para login (Se mantiene igual, está perfecto)
-    @http.route('/api/auth/login', type='json', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/auth/login', type='json', auth='none', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def login(self, **post):
         login = post.get('login')
         password = post.get('password')
@@ -59,7 +59,7 @@ class SecurityAppController(http.Controller):
             return {'status': 'error', 'message': 'Error en el servidor'}
 
     # Endpoint para obtener los logs (Se mantiene igual)
-    @http.route('/api/security/logs', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/security/logs', type='json', auth='user', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def get_logs(self, **post):
         user = request.env.user
         is_admin = user.has_group('base.group_system')
@@ -88,7 +88,7 @@ class SecurityAppController(http.Controller):
 
         return {'status': 'success', 'logs': result}
 
-    @http.route('/api/security/notifications', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/security/notifications', type='json', auth='user', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def get_notifications(self, **post):
         """ Obtiene las notificaciones reales de la tabla notificaciones.movil """
         user = request.env.user
@@ -120,7 +120,7 @@ class SecurityAppController(http.Controller):
             
         return {'status': 'success', 'notifications': result}
 
-    @http.route('/api/security/notifications/read', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/security/notifications/read', type='json', auth='user', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def mark_notification_read(self, **post):
         """ Permite marcar una notificación como leída desde la App """
         notif_id = post.get('notification_id')
@@ -134,7 +134,7 @@ class SecurityAppController(http.Controller):
         
         return {'status': 'error', 'message': 'Notificación no encontrada'}
 
-    @http.route('/api/security/register_token', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/security/register_token', type='json', auth='user', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def register_device_token(self, token, **post):
         user = request.env.user
         if user:
@@ -145,7 +145,7 @@ class SecurityAppController(http.Controller):
             return {'status': 'success', 'message': 'Token registrado correctamente'}
         return {'status': 'error', 'message': 'Usuario no autenticado'}
 
-    @http.route('/api/security/validate_2fa', type='json', auth='user', methods=['POST'], csrf=False)
+    @http.route('/api/security/validate_2fa', type='json', auth='user', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def validate_2fa(self, notification_id, decision, **post):
         notif = request.env['notificaciones.movil'].sudo().browse(notification_id)
         if not notif or notif.x_user_id.id != request.env.user.id:
