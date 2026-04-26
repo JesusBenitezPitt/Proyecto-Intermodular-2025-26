@@ -4,3 +4,6 @@ odoo-data
 
 # Entornos virtuales
 venv
+
+# Archivos de configuración
+config

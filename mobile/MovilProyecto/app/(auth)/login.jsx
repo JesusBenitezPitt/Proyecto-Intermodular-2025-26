@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { registerPushNotifications } from '../../services/notificationService';
 import { login } from '../../services/odooService';
 
 export default function LoginScreen() {
@@ -38,6 +39,8 @@ export default function LoginScreen() {
         } else {
           router.replace('/(tabs)');
         }
+
+        registerPushNotifications(session_id);
         
       } else {
         const errorMsg = res.result?.message || "Correo o contraseña incorrectos";

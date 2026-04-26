@@ -25,6 +25,7 @@ export default function UserProfileHeader() {
         text: "Salir", 
         style: "destructive", 
         onPress: async () => {
+          await logoutFromOdoo();
           await AsyncStorage.clear();
           router.replace('/(auth)/login');
         } 

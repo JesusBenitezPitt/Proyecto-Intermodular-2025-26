@@ -12,7 +12,7 @@ export const useOdoo = () => {
         body: JSON.stringify({ params: {} }),
       });
       const json = await response.json();
-      return json.result.logs; // Aquí es donde llega tu lista de Postman
+      return json.result.logs;
     } catch (error) {
       console.error("Error cargando logs:", error);
       return [];

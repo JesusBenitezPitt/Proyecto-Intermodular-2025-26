@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useOdoo } from '../../hooks/use-odoo';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useOdoo } from '../../hooks/use-odoo';
 
 export default function LogsScreen() {
   const [logs, setLogs] = useState([]);
@@ -28,13 +28,8 @@ export default function LogsScreen() {
     loadData();
   }, []);
 
-  // 2. Función para Aceptar o Denegar el acceso
   const handleDecision = async (id, decision) => {
-    // Aquí luego llamarás a tu API de Odoo: /api/security/decide
     Alert.alert("Acción realizada", `Has pulsado ${decision} para el log ${id}`);
-    
-    // Opcional: Recargar la lista después de decidir
-    // await loadData(); 
   };
 
   const renderItem = ({ item }) => (

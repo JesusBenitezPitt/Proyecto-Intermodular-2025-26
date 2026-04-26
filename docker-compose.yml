@@ -1,6 +1,6 @@
 services: # Aquí empieza la lista de programas que vamos a usar
   odoo: # El primer programa es Odoo
-    image: jesusbenitezpitt/odoo-proyecto:17.0 # Uso la imagen que construi con el Dockerfile de este proyecto.
+    image: jesusbenitezpitt/odoo-proyecto:latest # Uso la imagen que construi con el Dockerfile de este proyecto.
     container_name: odoo-proyecto # Ponle de nombre "odoo-proyecto" al grupo
     depends_on: # No arranques Odoo hasta que...
       - db # ...la base de datos esté encendida
@@ -9,11 +9,12 @@ services: # Aquí empieza la lista de programas que vamos a usar
     volumes: # Carpetas compartidas:
       - odoo-data:/var/lib/odoo # Guarda aquí las fotos y cosas de Odoo
       - ./backend/addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
+      - ./config/firebase-sdk.json:/var/lib/odoo/firebase_configs/firebase-sdk.json:ro # Carpeta para las claves de Firebase
     environment: # Ajustes para que Odoo sepa hablar con la DB:
       - HOST=db # El servidor de la DB se llama "db"
       - USER=odoo # El usuario es "odoo"
       - PASSWORD=odoo # La contraseña es "odoo"
-      - FIREBASE_KEY=BOgHtW2Wo2SOEKX76hx66A15FJ4-8UU70oGIy9FK-e_Q8zqPfkys-j11WkHXhEHDrZ1CmXX1HFnHkgU6giVXxuE # Clave de Firebase para notificaciones
+      - FIREBASE_JSON=/var/lib/odoo/firebase_configs/firebase-sdk.json # Ruta al archivo JSON de Firebase
     user: root # Se hace todo como root para que no pida permisos
 
   db: # El segundo contenedor es la Base de Datos
@@ -23,6 +24,8 @@ services: # Aquí empieza la lista de programas que vamos a usar
       - POSTGRES_DB=postgres # Crea una DB que se llame postgres
       - POSTGRES_USER=odoo # Crea el usuario odoo
       - POSTGRES_PASSWORD=odoo # Ponle la contraseña odoo
+    ports:
+      - "5432:5432" # Entra por el 5432 de mi PC al 5432 de la DB
     volumes: # Carpeta de la base de datos:
       - db-data:/var/lib/postgresql/data # Guarda aquí todas las tablas para que no se borren
 

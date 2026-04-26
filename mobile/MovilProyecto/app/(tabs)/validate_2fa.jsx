@@ -1,125 +1,129 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getLogDetails, respondToAuthRequest } from '../../services/odooService';
-import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { respondToAuthRequest } from '../../services/odooService';
 
 export default function Validate2FAScreen() {
   const { logId, notifId } = useLocalSearchParams();
-  const [log, setLog] = useState(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadLogInfo();
-  }, [logId]);
+  const handleDecision = async (decision) => {
+    if (!notifId) {
+      Alert.alert('Error', 'Datos de notificación inválidos');
+      return;
+    }
 
-  const loadLogInfo = async () => {
+    setLoading(true);
+
     try {
-      const data = await getLogDetails(logId);
-      setLog(data);
+      const result = await respondToAuthRequest(parseInt(notifId), decision);
+      
+      if (result?.status === 'success') {
+        Alert.alert(
+          'Acceso Aprobado',
+          'Has autorizado correctamente el inicio de sesión',
+          [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+        );
+      } else if (result?.status === 'blocked') {
+        Alert.alert(
+          'Acceso Denegado',
+          'Has bloqueado este intento de acceso. Tu cuenta quedará protegida.',
+          [{ text: 'Entendido', onPress: () => router.replace('/(tabs)') }]
+        );
+      } else {
+        Alert.alert('Error', result?.message || 'No se pudo procesar la solicitud');
+      }
     } catch (error) {
-      Alert.alert("Error", "No se pudo obtener la información del intento de acceso.");
+      console.error('Error al validar 2FA:', error);
+      Alert.alert('Error', 'No se pudo conectar con el servidor');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDecision = async (decision) => {
-    const actionText = decision === 'aprobado' ? "autorizar" : "bloquear";
-    
-    Alert.alert(
-      "Confirmar",
-      `¿Estás seguro de que deseas ${actionText} este acceso?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Confirmar", 
-          onPress: async () => {
-            setLoading(true);
-            const res = await respondToAuthRequest(notifId, decision);
-            if (res.status === 'success' || res.status === 'blocked') {
-              router.replace('/(tabs)');
-            }
-            setLoading(false);
-          }
-        }
-      ]
-    );
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#714B67" />
-        <Text style={styles.loadingText}>Verificando seguridad...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="shield-checkmark" size={80} color="#714B67" />
-        <Text style={styles.title}>Solicitud de Acceso</Text>
-        <Text style={styles.subtitle}>Se ha detectado un inicio de sesión en tu cuenta de Odoo.</Text>
-      </View>
+      <Text style={styles.title}>🔐 Verificación de Acceso</Text>
+      <Text style={styles.subtitle}>
+        Se ha detectado un intento de inicio de sesión.{'\n'}
+        ¿Autorizas este acceso?
+      </Text>
 
-      <View style={styles.card}>
-        <DetailRow icon="globe-outline" label="IP" value={log?.ip} />
-        <DetailRow icon="navigate-outline" label="Ubicación" value={log?.localizacion} />
-        <DetailRow icon="desktop-outline" label="Navegador" value={log?.navegador} />
-        <DetailRow 
-            icon="alert-circle-outline" 
-            label="Riesgo IA" 
-            value={log?.nivel_riesgo?.toUpperCase()} 
-            color={log?.nivel_riesgo === 'alto' ? '#dc3545' : '#ffc107'}
-        />
-      </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#714B67" />
+      ) : (
+        <>
+          <TouchableOpacity 
+            style={[styles.button, styles.approveButton]} 
+            onPress={() => handleDecision('aproved')}
+          >
+            <Text style={styles.buttonText}>✓ Aprobar Acceso</Text>
+          </TouchableOpacity>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.btn, styles.btnApprove]} 
-          onPress={() => handleDecision('aprobado')}
-        >
-          <Text style={styles.btnText}>SÍ, SOY YO</Text>
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.denyButton]} 
+            onPress={() => handleDecision('denied')}
+          >
+            <Text style={styles.buttonText}>✗ Denegar y Bloquear</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.btn, styles.btnDeny]} 
-          onPress={() => handleDecision('denegado')}
-        >
-          <Text style={styles.btnText}>NO, BLOQUEAR MI CUENTA</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            onPress={() => router.back()}
+          >
+            <Text style={styles.cancelText}>Decidir después</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }
 
-const DetailRow = ({ icon, label, value, color = '#333' }) => (
-  <View style={styles.row}>
-    <Ionicons name={icon} size={20} color="#666" style={{ width: 30 }} />
-    <Text style={styles.label}>{label}:</Text>
-    <Text style={[styles.value, { color }]}>{value}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 25 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { alignItems: 'center', marginTop: 40, marginBottom: 30 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 10 },
-  subtitle: { fontSize: 14, color: '#666', textAlign: 'center', marginTop: 5 },
-  card: { backgroundColor: '#f9f9f9', borderRadius: 15, padding: 20, marginBottom: 30, elevation: 2 },
-  row: { flexDirection: 'row', marginBottom: 15, alignItems: 'center' },
-  label: { fontSize: 14, color: '#888', width: 80 },
-  value: { fontSize: 14, fontWeight: '600', flex: 1 },
-  footer: { marginTop: 'auto', marginBottom: 20 },
-  btn: { paddingVertical: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
-  btnApprove: { backgroundColor: '#714B67' }, // Tu color corporativo
-  btnDeny: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#dc3545' },
-  btnText: { fontWeight: 'bold', fontSize: 16, color: '#fff' },
-  loadingText: { marginTop: 10, color: '#714B67' }
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    padding: 30, 
+    backgroundColor: '#fff' 
+  },
+  title: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    marginBottom: 20, 
+    textAlign: 'center', 
+    color: '#714B67' 
+  },
+  subtitle: { 
+    fontSize: 16, 
+    marginBottom: 40, 
+    textAlign: 'center', 
+    color: '#555',
+    lineHeight: 24
+  },
+  button: { 
+    padding: 18, 
+    borderRadius: 10, 
+    alignItems: 'center', 
+    marginBottom: 15 
+  },
+  approveButton: { 
+    backgroundColor: '#28a745' 
+  },
+  denyButton: { 
+    backgroundColor: '#dc3545' 
+  },
+  buttonText: { 
+    color: '#fff', 
+    fontSize: 18, 
+    fontWeight: '600' 
+  },
+  cancelButton: { 
+    marginTop: 20, 
+    alignItems: 'center' 
+  },
+  cancelText: { 
+    color: '#714B67', 
+    fontSize: 16 
+  }
 });
-
-styles.btnTextDeny = { ...styles.btnText, color: '#dc3545' }; 

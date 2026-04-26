@@ -1,31 +1,33 @@
-import * as Notifications from 'expo-notifications';
+import messaging from '@react-native-firebase/messaging';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { saveTokenInOdoo } from './odooService';
 
 export const registerPushNotifications = async (sessionId) => {
     try {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
+        if (Platform.OS === 'android') {
+            await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+            );
         }
 
-        if (finalStatus !== 'granted') {
-            console.warn('Permiso de notificaciones denegado');
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (!enabled) {
             return;
         }
 
-        const tokenData = await Notifications.getExpoPushTokenAsync({
-            projectId: 'da72762b-367c-4603-ab5a-9f2f44fb3a2e' 
-        });
-        const token = tokenData.data;
+        const token = await messaging().getToken();
+        
+        console.log("FCM Token generado:", token);
 
         const result = await saveTokenInOdoo(token, sessionId);
-        console.log("Token vinculado en Odoo:", result);
+        console.log("Token de Firebase vinculado en Odoo:", result);
 
         return token;
     } catch (error) {
-        console.error("Error en proceso de notificaciones:", error);
+        console.error("Error en proceso de notificaciones Firebase:", error);
     }
 };
