@@ -78,21 +78,29 @@ class SecurityAppController(http.Controller):
             domain = [('x_user_id', '=', user.id)]
             
         notifications = request.env['notificaciones.movil'].sudo().search_read(
-            domain, 
+            domain,
             ['x_titulo', 'x_mensaje', 'x_tipo_alerta', 'x_leida', 'create_date', 'x_log_id', 'x_estado_aprobacion', 'x_es_confirmacion_2fa'],
             limit=50,
             order='create_date desc'
         )
-        
+
+        tz = pytz.timezone('Europe/Madrid')
         result = []
         for n in notifications:
+            create_date = n['create_date']
+            if create_date:
+                fecha_madrid = pytz.utc.localize(create_date).astimezone(tz)
+                fecha_formateada = fecha_madrid.strftime('%d/%m/%Y %H:%M')
+            else:
+                fecha_formateada = 'Sin fecha'
+
             result.append({
                 'id': n['id'],
                 'titulo': n['x_titulo'],
                 'mensaje': n['x_mensaje'],
                 'tipo': n['x_tipo_alerta'],
                 'leida': n['x_leida'],
-                'fecha': n['create_date'],
+                'fecha': fecha_formateada,
                 'log_id': n['x_log_id'][0] if n['x_log_id'] else None,
                 'estado_aprobacion': n['x_estado_aprobacion'],
                 'es_confirmacion_2fa': n['x_es_confirmacion_2fa']
@@ -135,9 +143,11 @@ class SecurityAppController(http.Controller):
                 estado_app = 'exito' if l.x_estado_intento == 'exito' else 'fallo'
 
                 fecha_utc = l.x_fecha_inicio
-                fecha_madrid = pytz.utc.localize(fecha_utc).astimezone(tz)
-
-                fecha_formateada = fecha_madrid.strftime('%d/%m/%Y %H:%M')
+                if fecha_utc:
+                    fecha_madrid = pytz.utc.localize(fecha_utc).astimezone(tz)
+                    fecha_formateada = fecha_madrid.strftime('%d/%m/%Y %H:%M')
+                else:
+                    fecha_formateada = 'Sin fecha'
 
                 logs_data.append({
                     'id': l.id,

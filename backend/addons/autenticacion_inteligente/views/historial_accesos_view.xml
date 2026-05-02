@@ -1,1 +1,79 @@
-<odoo/>
+<odoo>
+    <data>
+
+        <!-- Vista lista del historial de accesos -->
+        <record id="view_sesion_log_list" model="ir.ui.view">
+            <field name="name">authentication.sesion.log.list</field>
+            <field name="model">authentication.sesion.log</field>
+            <field name="arch" type="xml">
+                <list string="Historial de Accesos" create="false" edit="false" delete="false"
+                      decoration-danger="x_nivel_riesgo == 'alto'"
+                      decoration-success="x_estado_intento == 'exito' and x_nivel_riesgo == 'bajo'">
+                    <field name="x_fecha_inicio" string="Fecha y Hora"/>
+                    <field name="x_ip" string="Dirección IP"/>
+                    <field name="x_navegador" string="Dispositivo"/>
+                    <field name="x_localizacion" string="Ubicación"/>
+                    <field name="x_estado_intento" string="Resultado"/>
+                    <field name="x_nivel_riesgo" string="Nivel de Riesgo"/>
+                    <field name="x_franja_horaria" string="Franja Horaria"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Vista formulario (solo lectura) -->
+        <record id="view_sesion_log_form" model="ir.ui.view">
+            <field name="name">authentication.sesion.log.form</field>
+            <field name="model">authentication.sesion.log</field>
+            <field name="arch" type="xml">
+                <form string="Detalle del Acceso" create="false" edit="false" delete="false">
+                    <sheet>
+                        <group string="Información del Acceso">
+                            <field name="x_fecha_inicio" string="Fecha y Hora"/>
+                            <field name="x_ip" string="Dirección IP"/>
+                            <field name="x_navegador" string="Dispositivo"/>
+                            <field name="x_localizacion" string="Ubicación"/>
+                            <field name="x_franja_horaria" string="Franja Horaria"/>
+                        </group>
+                        <group string="Resultado del Análisis">
+                            <field name="x_estado_intento" string="Resultado"/>
+                            <field name="x_nivel_riesgo" string="Nivel de Riesgo"/>
+                            <field name="x_intentos_fallidos" string="Intentos Fallidos Previos"/>
+                            <field name="x_alerta_seguridad" string="Observaciones"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción de ventana -->
+        <record id="action_historial_accesos_usuario" model="ir.actions.act_window">
+            <field name="name">Mi Historial de Accesos</field>
+            <field name="res_model">authentication.sesion.log</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_sesion_log_list"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Aún no tienes registros de acceso.
+                </p>
+                <p>
+                    Aquí aparecerán todos tus inicios de sesión con la fecha, hora y dirección IP desde donde se realizaron.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menú raíz visible para todos los usuarios -->
+        <menuitem id="menu_seguridad_usuario_root"
+                  name="Mi Seguridad"
+                  sequence="100"
+                  groups="base.group_user"/>
+
+        <!-- Submenú del historial -->
+        <menuitem id="menu_historial_accesos_usuario"
+                  name="Historial de Accesos"
+                  parent="menu_seguridad_usuario_root"
+                  action="action_historial_accesos_usuario"
+                  sequence="10"
+                  groups="base.group_user"/>
+
+    </data>
+</odoo>

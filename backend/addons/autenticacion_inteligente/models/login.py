@@ -54,29 +54,40 @@ class ResUsersLogin(models.Model):
         # Gestión de fallos
         if estado == 'fallo':
             INTENTOS[login] = INTENTOS.get(login, 0) + 1
-            
+
             with cls.pool.cursor() as cr:
                 env = api.Environment(cr, 1, {})
                 user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
 
-                if user and INTENTOS[login] >= user.partner_id.x_limite_intentos:
-                    user.partner_id.write({
-                        'x_is_blocked': True,
-                        'x_timestamp_bloqueo': datetime.now(),
-                    })
-
-                    env['authentication.sesion.log'].sudo().create({
-                        'partner_id': user.partner_id.id,
-                        'x_ip': ip,
-                        'x_navegador': navegador,
-                        'x_fecha_inicio': datetime.now(),
-                        'x_estado_intento': 'bloqueo',
-                        'x_intentos_fallidos': INTENTOS[login],
-                        'x_nivel_riesgo': 'alto',
-                        'x_alerta_seguridad': 'CUENTA BLOQUEADA: Exceso de intentos.'
-                    })
+                if user:
+                    if INTENTOS[login] >= user.partner_id.x_limite_intentos:
+                        user.partner_id.write({
+                            'x_is_blocked': True,
+                            'x_timestamp_bloqueo': datetime.now(),
+                        })
+                        env['authentication.sesion.log'].sudo().create({
+                            'partner_id': user.partner_id.id,
+                            'x_ip': ip,
+                            'x_navegador': navegador,
+                            'x_fecha_inicio': datetime.now(),
+                            'x_estado_intento': 'bloqueo',
+                            'x_intentos_fallidos': INTENTOS[login],
+                            'x_nivel_riesgo': 'alto',
+                            'x_alerta_seguridad': 'CUENTA BLOQUEADA: Exceso de intentos.'
+                        })
+                        if login in INTENTOS: del INTENTOS[login]
+                    else:
+                        env['authentication.sesion.log'].sudo().create({
+                            'partner_id': user.partner_id.id,
+                            'x_ip': ip,
+                            'x_navegador': navegador,
+                            'x_fecha_inicio': datetime.now(),
+                            'x_estado_intento': 'fallo',
+                            'x_intentos_fallidos': INTENTOS[login],
+                            'x_nivel_riesgo': 'alto',
+                            'x_alerta_seguridad': f'Intento fallido #{INTENTOS[login]}'
+                        })
                     cr.commit()
-                    if login in INTENTOS: del INTENTOS[login]
 
                 if error_auth: raise error_auth
         else:
