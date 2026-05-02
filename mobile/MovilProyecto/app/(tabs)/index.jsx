@@ -44,28 +44,9 @@ export default function LogsScreen() {
       <Text style={styles.usuario}>👤 {item.usuario}</Text>
       <Text style={styles.ip}>IP: {item.ip || '0.0.0.0'}</Text>
 
-      {/* Solo mostramos botones si el estado es 'pendiente' */}
-      {item.estado === 'pendiente' ? (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.btn, styles.btnDeny]} 
-            onPress={() => handleDecision(item.id, 'denegar')}
-          >
-            <Text style={styles.btnText}>Denegar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.btn, styles.btnAccept]} 
-            onPress={() => handleDecision(item.id, 'aceptar')}
-          >
-            <Text style={styles.btnText}>Aceptar</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <Text style={[styles.finalStatus, item.estado === 'aceptado' ? styles.verde : styles.rojo]}>
-          Estado: {item.estado?.toUpperCase()}
-        </Text>
-      )}
+      <Text style={[styles.finalStatus, item.estado === 'exito' ? styles.verde : styles.rojo]}>
+        Estado: {item.estado?.toUpperCase()}
+      </Text>
     </View>
   );
 
