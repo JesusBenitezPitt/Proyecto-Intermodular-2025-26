@@ -1,0 +1,39 @@
+<odoo>
+    <record id="action_report_franjas_horarias_pdf" model="ir.actions.report">
+        <field name="name">Informe de Franjas Horarias (PDF)</field>
+        <field name="model">informe.franjas.horarias</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">autenticacion_inteligente.plantilla_informe_franjas_pdf</field>
+        <field name="binding_model_id" ref="autenticacion_inteligente.model_informe_franjas_horarias"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="plantilla_informe_franjas_pdf">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Informe de Accesos por Franja Horaria</h2>
+                    <p class="text-muted">Análisis agregado de todos los intentos de autenticación clasificados por momento del día.</p>
+                    <table class="table table-bordered table-sm mt32">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Franja Horaria</th>
+                                <th class="text-center">Total Accesos</th>
+                                <th class="text-center">Alertas IA (Riesgo Alto)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="o">
+                                <tr>
+                                    <td><span t-field="o.franja_horaria"/></td>
+                                    <td class="text-center"><span t-field="o.total_accesos"/></td>
+                                    <td class="text-center"><span t-field="o.alertas_ia"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

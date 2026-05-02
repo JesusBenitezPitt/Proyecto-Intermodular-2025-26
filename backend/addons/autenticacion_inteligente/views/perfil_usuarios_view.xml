@@ -168,10 +168,14 @@
         </field>
     </record>
 
+    <!-- Menú para usuarios normales: solo ven sus propios registros (filtrado por regla de acceso) -->
+    <menuitem id="menu_mis_accesos_root" name="Mi Seguridad" web_icon="base.menu_security" sequence="200" groups="base.group_user"/>
+    <menuitem id="menu_mis_accesos" parent="menu_mis_accesos_root" name="Mis Inicios de Sesión" action="accion_sesion_log" sequence="10"/>
+
     <menuitem id="menu_authentication_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security" groups="base.group_system"/>
     <menuitem id="menu_authentication_perfiles" parent="menu_authentication_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
     <menuitem id="menu_authentication_sesiones" parent="menu_authentication_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
     <menuitem id="menu_authentication_alertas" parent="menu_authentication_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>
-    <menuitem id="menu_authentication_sql" parent="menu_authentication_basica_root" name="Consulta SQL Tiempo Real" action="accion_informe_sql" sequence="40"/>
+    <menuitem id="menu_authentication_sql" parent="menu_authentication_basica_root" name="Ranking de IPs Sospechosas" action="accion_informe_sql" sequence="40"/>
     <menuitem id="menu_reporte_patrones" parent="menu_authentication_basica_root" name="Estadísticas por Franjas Horarias" action="action_report_franjas_horarias" sequence="50"/>
 </odoo>

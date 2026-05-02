@@ -8,8 +8,10 @@
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
+        'security/security.xml',
         'views/perfil_usuarios_view.xml',
-        'views/informe_usuarios_adaptado.xml'
+        'views/informe_usuarios_adaptado.xml',
+        'views/informe_franjas_horarias.xml'
     ],
     'installable': True,
     'application': True,
