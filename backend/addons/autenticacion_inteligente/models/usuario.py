@@ -17,7 +17,6 @@ class Usuario(models.Model):
     x_ultima_conexion = fields.Datetime(string="Última Conexión Exitosa")
     x_timestamp_bloqueo = fields.Datetime(string="Último Bloqueo de Cuenta")
     x_session_log_ids = fields.One2many('authentication.sesion.log', 'partner_id', string="Logs de Acceso")
-    x_device_token = fields.Char(string='Token de Dispositivo Móvil')
     x_2fa_enabled = fields.Boolean(string='2FA Activo en Móvil', default=False)
     x_firebase_token = fields.Char(string='Token de Firebase')
 
