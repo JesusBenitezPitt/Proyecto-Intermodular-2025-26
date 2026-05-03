@@ -8,7 +8,13 @@ venv
 # Archivos de configuración
 config/*
 
+<<<<<<< HEAD
 # Python compilado
 *.pyc
 *.pyo
 __pycache__/
+=======
+# PyChache
+__pycache__/
+*.pyc
+>>>>>>> 15e6258 (Proyecto acabado)
