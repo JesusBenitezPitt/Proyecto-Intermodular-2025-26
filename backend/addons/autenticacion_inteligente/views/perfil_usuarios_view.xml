@@ -2,7 +2,9 @@
     <record id="accion_sesion_log" model="ir.actions.act_window">
         <field name="name">Log de Sesiones</field>
         <field name="res_model">authentication.sesion.log</field>
-        <field name="view_mode">tree,pivot,graph,form</field> </record>
+        <field name="view_mode">tree,pivot,graph,form</field>
+        <field name="view_id" ref="vista_sesion_log_list"/>
+    </record>
 
     <record id="action_log_riesgo_alto" model="ir.actions.act_window">
         <field name="name">Alertas de Riesgo Alto</field>
@@ -169,10 +171,39 @@
     </record>
 
     <!-- Menú para usuarios normales: solo ven sus propios registros (filtrado por regla de acceso) -->
-    <menuitem id="menu_mis_accesos_root" name="Mi Seguridad" web_icon="base.menu_security" sequence="200" groups="base.group_user"/>
-    <menuitem id="menu_mis_accesos" parent="menu_mis_accesos_root" name="Mis Inicios de Sesión" action="accion_sesion_log" sequence="10"/>
+    <!-- Vista y acción para usuarios normales (solo sus propios accesos) -->
+    <record id="vista_mis_accesos_list" model="ir.ui.view">
+        <field name="name">authentication.sesion.log.mis.accesos</field>
+        <field name="model">authentication.sesion.log</field>
+        <field name="arch" type="xml">
+            <tree string="Mis Accesos" decoration-danger="x_nivel_riesgo in ('alto')" create="false" edit="false" delete="false">
+                <field name="x_fecha_inicio" string="Fecha y Hora"/>
+                <field name="x_ip" string="Dirección IP"/>
+                <field name="x_navegador" string="Dispositivo"/>
+                <field name="x_localizacion" string="Ubicación"/>
+                <field name="x_nivel_riesgo" string="Nivel de Riesgo" widget="badge" decoration-danger="x_nivel_riesgo in ('alto')"/>
+                <field name="x_estado_intento" string="Resultado" widget="badge" decoration-success="x_estado_intento == 'exito'" decoration-danger="x_estado_intento == 'bloqueo'"/>
+                <field name="x_alerta_seguridad" string="Observaciones"/>
+            </tree>
+        </field>
+    </record>
 
-    <menuitem id="menu_authentication_basica_root" name="Auditoría de sesiones" web_icon="base.menu_security" groups="base.group_system"/>
+    <record id="action_mis_accesos" model="ir.actions.act_window">
+        <field name="name">Mis Accesos</field>
+        <field name="res_model">authentication.sesion.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="vista_mis_accesos_list"/>
+        <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no tienes registros de acceso.</p>
+            <p>Aquí aparecerán todos tus inicios de sesión con la fecha, hora y dirección IP.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mis_accesos_root" name="Mi Seguridad" web_icon="base,static/description/icon.png" groups="base.group_user" sequence="200"/>
+    <menuitem id="menu_mis_accesos" parent="menu_mis_accesos_root" name="Mis Accesos" action="action_mis_accesos" sequence="10"/>
+
+    <menuitem id="menu_authentication_basica_root" name="Auditoría de sesiones" web_icon="base,static/description/settings.png" groups="base.group_system"/>
     <menuitem id="menu_authentication_perfiles" parent="menu_authentication_basica_root" name="Contactos" action="base.action_partner_form" sequence="10"/>
     <menuitem id="menu_authentication_sesiones" parent="menu_authentication_basica_root" name="Historial de Sesiones Completo" action="accion_sesion_log" sequence="20"/>
     <menuitem id="menu_authentication_alertas" parent="menu_authentication_basica_root" name="Alertas Críticas" action="action_log_riesgo_alto" sequence="30"/>

@@ -6,7 +6,8 @@ odoo-data
 venv
 
 # Archivos de configuración
-config
+config/*
+
 # Python compilado
 *.pyc
 *.pyo

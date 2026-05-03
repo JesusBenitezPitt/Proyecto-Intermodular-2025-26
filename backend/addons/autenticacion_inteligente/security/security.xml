@@ -1,10 +1,22 @@
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
+        <!-- Usuarios normales: solo ven sus propios registros -->
         <record id="rule_sesion_log_usuario_propio" model="ir.rule">
             <field name="name">Log de Sesión: usuario ve solo sus propios registros</field>
             <field name="model_id" ref="model_authentication_sesion_log"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <!-- Admins: ven todos los registros -->
+        <record id="rule_sesion_log_admin_all" model="ir.rule">
+            <field name="name">Log de Sesión: admin ve todos los registros</field>
+            <field name="model_id" ref="model_authentication_sesion_log"/>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+            <field name="domain_force">[]</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>

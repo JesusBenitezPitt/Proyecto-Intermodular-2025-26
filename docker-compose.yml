@@ -9,7 +9,7 @@ services: # Aquí empieza la lista de programas que vamos a usar
     volumes: # Carpetas compartidas:
       - odoo-data:/var/lib/odoo # Guarda aquí las fotos y cosas de Odoo
       - ./backend/addons:/mnt/extra-addons # Mi carpeta de "addons" de fuera se ve dentro de Odoo
-      - ./config/firebase-sdk.json:/var/lib/odoo/firebase_configs/firebase-sdk.json:ro # Carpeta para las claves de Firebase
+      - ./config:/var/lib/odoo/firebase_configs:ro # Carpeta para las claves de Firebase
     environment: # Ajustes para que Odoo sepa hablar con la DB:
       - HOST=db # El servidor de la DB se llama "db"
       - USER=odoo # El usuario es "odoo"

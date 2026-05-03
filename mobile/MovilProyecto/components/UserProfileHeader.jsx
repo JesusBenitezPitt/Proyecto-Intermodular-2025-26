@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { logoutFromOdoo } from '../services/odooService';
 
 export default function UserProfileHeader() {
   const [userData, setUserData] = useState({ name: '', photo: '' });
@@ -25,10 +26,10 @@ export default function UserProfileHeader() {
         text: "Salir", 
         style: "destructive", 
         onPress: async () => {
-          await logoutFromOdoo();
+          logoutFromOdoo().catch(() => {});
           await AsyncStorage.clear();
           router.replace('/(auth)/login');
-        } 
+        }
       }
     ]);
   };

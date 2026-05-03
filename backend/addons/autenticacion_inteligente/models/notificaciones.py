@@ -29,7 +29,7 @@ class NotificacionesMovil(models.Model):
     def create(self, vals_list):
         records = super(NotificacionesMovil, self).create(vals_list)
         for rec in records:
-            if rec.x_user_id.x_firebase_token:
+            if rec.x_user_id.partner_id.x_firebase_token:
                 rec._enviar_a_firebase()
             else:
                 _logger.warning(f"Usuario {rec.x_user_id.name} no tiene token de Firebase")
@@ -86,7 +86,7 @@ class NotificacionesMovil(models.Model):
                     "data": {
                         "notification_id": str(self.id),
                         "log_id": str(self.x_log_id.id) if self.x_log_id else "",
-                        "requires_action": "true" if self.x_estado_aprobacion == 'pending' else "false"
+                        "requires_action": "true" if self.x_es_confirmacion_2fa else "false"
                     }
                 }
             }

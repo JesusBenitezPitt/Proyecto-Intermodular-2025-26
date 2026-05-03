@@ -65,3 +65,7 @@ export const respondToAuthRequest = async (notificationId, decision) => {
     });
     return data?.result;
 };
+
+export const logoutFromOdoo = async () => {
+    await fetchFromOdoo('/api/security/logout', {});
+};

@@ -51,6 +51,7 @@
             <field name="res_model">authentication.sesion.log</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_sesion_log_list"/>
+            <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Aún no tienes registros de acceso.
@@ -61,19 +62,6 @@
             </field>
         </record>
 
-        <!-- Menú raíz visible para todos los usuarios -->
-        <menuitem id="menu_seguridad_usuario_root"
-                  name="Mi Seguridad"
-                  sequence="100"
-                  groups="base.group_user"/>
-
-        <!-- Submenú del historial -->
-        <menuitem id="menu_historial_accesos_usuario"
-                  name="Historial de Accesos"
-                  parent="menu_seguridad_usuario_root"
-                  action="action_historial_accesos_usuario"
-                  sequence="10"
-                  groups="base.group_user"/>
 
     </data>
 </odoo>

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { respondToAuthRequest } from '../../services/odooService';
 
 export default function Validate2FAScreen() {
@@ -9,34 +9,16 @@ export default function Validate2FAScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleDecision = async (decision) => {
-    if (!notifId) {
-      Alert.alert('Error', 'Datos de notificación inválidos');
-      return;
-    }
+    if (!notifId) return;
 
     setLoading(true);
 
     try {
       const result = await respondToAuthRequest(parseInt(notifId), decision);
-      
-      if (result?.status === 'success') {
-        Alert.alert(
-          'Acceso Aprobado',
-          'Has autorizado correctamente el inicio de sesión',
-          [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-        );
-      } else if (result?.status === 'blocked') {
-        Alert.alert(
-          'Acceso Denegado',
-          'Has bloqueado este intento de acceso. Tu cuenta quedará protegida.',
-          [{ text: 'Entendido', onPress: () => router.replace('/(tabs)') }]
-        );
-      } else {
-        Alert.alert('Error', result?.message || 'No se pudo procesar la solicitud');
-      }
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Error al validar 2FA:', error);
-      Alert.alert('Error', 'No se pudo conectar con el servidor');
+      router.replace('/(tabs)');
     } finally {
       setLoading(false);
     }
@@ -54,25 +36,18 @@ export default function Validate2FAScreen() {
         <ActivityIndicator size="large" color="#714B67" />
       ) : (
         <>
-          <TouchableOpacity 
-            style={[styles.button, styles.approveButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.approveButton]}
             onPress={() => handleDecision('aproved')}
           >
             <Text style={styles.buttonText}>✓ Aprobar Acceso</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.denyButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.denyButton]}
             onPress={() => handleDecision('denied')}
           >
             <Text style={styles.buttonText}>✗ Denegar y Bloquear</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.cancelButton} 
-            onPress={() => router.back()}
-          >
-            <Text style={styles.cancelText}>Decidir después</Text>
           </TouchableOpacity>
         </>
       )}

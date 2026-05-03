@@ -144,10 +144,10 @@ config/firebase-sdk.json
 
 | Rol | Usuario | Contraseña |
 |---|---|---|
-| Administrador | `admin` | `admin` |
-| Usuario normal | `usuario_demo` | `demo1234` |
+| Administrador | `prueba@prueba.com` | `odoo` |
+| Usuario normal | `prueba2@prueba.com` | `odoo` |
 
-> Estas credenciales se crean al instalar el módulo con datos de demo. Si se monta una base de datos limpia, se usan las que se hayan definido al crearla.
+> Estas credenciales se crean al instalar el módulo con datos de demo ya configurados y el usuario prueba creado. Si se monta una base de datos limpia, se usan las que se hayan definido al crearla.
 
 ---
 
@@ -185,7 +185,7 @@ config/firebase-sdk.json
 
 ---
 
-## Funcionalidades pendientes
+## Implementaciones futuras
 
 Cosas que se han quedado fuera del alcance pero que tendría sentido añadir más adelante:
 
@@ -253,7 +253,6 @@ Proyecto-Intermodular-2025-26/
 │       ├── components/
 │       ├── services/            # Cliente HTTP de Odoo y Firebase
 │       └── constants/config.js  # IP del servidor y nombre de la BD
-├── db-init/                     # Scripts de arranque de PostgreSQL
 ├── docs/
 │   ├── capturas/                # Imágenes y GIFs del README
 │   └── instalacion_modulo/

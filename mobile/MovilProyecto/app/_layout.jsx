@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function RootLayout() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -70,42 +70,17 @@ export default function RootLayout() {
     // Notificación cuando la app está en foreground (abierta)
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       console.log('Notificación recibida en foreground:', remoteMessage);
-      
-      const title = remoteMessage.notification?.title || 'Aviso de seguridad';
-      const body = remoteMessage.notification?.body || 'Nuevo evento de seguridad';
-      
+
       if (remoteMessage.data?.requires_action === 'true') {
-        // Es una solicitud de aprobación 2FA
-        Alert.alert(
-          title,
-          body,
-          [
-            {
-              text: 'Aprobar',
-              onPress: () => router.push({
-                pathname: '/validate_2fa',
-                params: { 
-                  logId: remoteMessage.data.log_id,
-                  notifId: remoteMessage.data.notification_id
-                }
-              })
-            },
-            { text: 'Ver después', style: 'cancel' }
-          ]
-        );
+        router.push({
+          pathname: '/validate_2fa',
+          params: {
+            logId: remoteMessage.data.log_id,
+            notifId: remoteMessage.data.notification_id
+          }
+        });
       } else {
-        // Es una notificación informativa
-        Alert.alert(
-          title,
-          body,
-          [
-            { 
-              text: 'Ver detalles', 
-              onPress: () => router.push('/notifications')
-            },
-            { text: 'Cerrar', style: 'cancel' }
-          ]
-        );
+        router.push('/notifications');
       }
     });
 
@@ -127,7 +102,6 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)/login" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="validate_2fa" />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
     </Stack>
   );
