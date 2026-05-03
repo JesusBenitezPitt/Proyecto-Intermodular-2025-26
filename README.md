@@ -88,6 +88,30 @@ export const ODOO_CONFIG = {
 
 ## Instrucciones de ejecución
 
+> Antes que nada debemos habilitar el firewall para permitir las conexiones desde fuera a Odoo y las APIs
+
+
+En Windows abre **PowerShell como administrador** y ejecuta:
+
+```powershell
+New-NetFirewallRule -DisplayName "Entrada Odoo" -Direction Inbound -Protocol TCP -LocalPort 8069 -Action Allow
+```
+
+En Ubuntu abre una terminal y ejecuta:
+
+```bash
+sudo ufw allow 8069/tcp
+sudo ufw reload
+```
+
+> Si no está atcivo aún:
+
+```bash
+sudo ufw enable
+sudo ufw allow 8069/tcp
+sudo ufw reload
+```
+
 Una vez instalado el módulo, en el menú principal de Odoo aparece la sección **"Auditoría de sesiones"**, que da acceso a:
 
 - Contactos (con la pestaña de Seguridad nueva)
