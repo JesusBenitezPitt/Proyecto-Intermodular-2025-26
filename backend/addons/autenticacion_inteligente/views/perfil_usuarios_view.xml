@@ -125,7 +125,7 @@
     <record id="action_report_franjas_horarias" model="ir.actions.act_window">
         <field name="name">Informe de Franjas Horarias</field>
         <field name="res_model">informe.franjas.horarias</field>
-        <field name="view_mode">tree,graph,pivot</field>
+        <field name="view_mode">graph,pivot,tree</field>
     </record>
 
     <record id="view_franjas_horarias_graph" model="ir.ui.view">
