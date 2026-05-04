@@ -52,11 +52,7 @@ class NotificacionesMovil(models.Model):
 
     def _enviar_a_firebase(self):
         env_var = os.getenv('FIREBASE_JSON')
-        ruta_json = env_var or os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-            '..', '..', 'config', 'firebase-sdk.json'
-        )
-        ruta_json = os.path.normpath(ruta_json)
+        ruta_json = env_var or '/var/lib/odoo/firebase_configs/firebase-sdk.json'
 
         if not os.path.exists(ruta_json):
             _logger.error("❌ ARCHIVO NO ENCONTRADO: %s", ruta_json)
