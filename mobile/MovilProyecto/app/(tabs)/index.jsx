@@ -6,10 +6,9 @@ import { useOdoo } from '../../hooks/use-odoo';
 
 export default function LogsScreen() {
   const [logs, setLogs] = useState([]);
-  const { fetchLogs } = useOdoo(); // Asumiendo que tu hook ya está listo
+  const { fetchLogs } = useOdoo();
   const router = useRouter();
 
-  // 1. Cargar los logs al abrir la pantalla
   const loadData = async () => {
     try {
       const session = await AsyncStorage.getItem('session_id');

@@ -47,7 +47,7 @@ export default function LoginScreen() {
         Alert.alert("Acceso Denegado", errorMsg);
       }
     } catch (error) {
-      Alert.alert("Error de conexión", "No se pudo conectar con el servidor Odoo");
+      Alert.alert("Error de conexión", error.message || "No se pudo conectar con el servidor Odoo");
     }
   };
 
