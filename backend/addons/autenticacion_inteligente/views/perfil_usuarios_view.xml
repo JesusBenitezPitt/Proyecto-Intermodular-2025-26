@@ -125,7 +125,19 @@
     <record id="action_report_franjas_horarias" model="ir.actions.act_window">
         <field name="name">Informe de Franjas Horarias</field>
         <field name="res_model">informe.franjas.horarias</field>
-        <field name="view_mode">graph,pivot,tree</field>
+        <field name="view_mode">tree,graph,pivot</field>
+    </record>
+
+    <record id="view_franjas_horarias_tree" model="ir.ui.view">
+        <field name="name">informe.franjas.horarias.tree</field>
+        <field name="model">informe.franjas.horarias</field>
+        <field name="arch" type="xml">
+            <tree string="Accesos por Franja Horaria" create="false" edit="false" delete="false">
+                <field name="franja_horaria" string="Franja Horaria"/>
+                <field name="total_accesos" string="Total Accesos"/>
+                <field name="alertas_ia" string="Alertas IA (Riesgo Alto)"/>
+            </tree>
+        </field>
     </record>
 
     <record id="view_franjas_horarias_graph" model="ir.ui.view">
