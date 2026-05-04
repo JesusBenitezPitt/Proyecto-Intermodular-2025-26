@@ -125,7 +125,16 @@
     <record id="action_report_franjas_horarias" model="ir.actions.act_window">
         <field name="name">Informe de Franjas Horarias</field>
         <field name="res_model">informe.franjas.horarias</field>
-        <field name="view_mode">tree,graph,pivot</field>
+        <field name="view_mode">graph,pivot,tree</field>
+    </record>
+
+    <record id="action_server_print_franjas_pdf" model="ir.actions.server">
+        <field name="name">Exportar PDF</field>
+        <field name="model_id" ref="autenticacion_inteligente.model_informe_franjas_horarias"/>
+        <field name="binding_model_id" ref="autenticacion_inteligente.model_informe_franjas_horarias"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">action = env.ref('autenticacion_inteligente.action_report_franjas_horarias_pdf').report_action(env['informe.franjas.horarias'].search([]))</field>
     </record>
 
     <record id="view_franjas_horarias_tree" model="ir.ui.view">
